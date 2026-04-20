@@ -7,5 +7,5 @@
 - [x] Linting and pytest succeed
 - [x] Create branch for week1 and push to origin
 - [x] RED: Download and run currency tests
-- [ ] GREEN: Make them pass
+- [x] GREEN: Make them pass
 - [ ] Update badge generation to report coverage on all branches
