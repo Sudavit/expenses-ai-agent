@@ -6,6 +6,6 @@
 - [x] Clone, add dependencies, setup venv, sync
 - [x] Linting and pytest succeed
 - [x] Create branch for week1 and push to origin
-- [ ] Update badge generation to report coverage on all branches
-- [ ] RED: Download and run tests
+- [x] RED: Download and run currency tests
 - [ ] GREEN: Make them pass
+- [ ] Update badge generation to report coverage on all branches
