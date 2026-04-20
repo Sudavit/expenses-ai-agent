@@ -1,0 +1,72 @@
+# fix everything below that contains "AAI"
+
+[project]
+name = "AAI"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "genbadge[coverage]>=1.1.3",
+    "line-profiler>=5.0.2",
+    "pandas>=3.0.1",        # to analyze performance
+    "prek>=0.3.8",
+    "pyinstrument>=5.1.2",  # to analyze performance
+    "pytest-cov>=7.1.0",
+    "pytest>=9.0.2",
+    "ruff>=0.15.9",
+    "ty>=0.0.28",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/AAI"]
+
+[tool.uv]
+managed = true
+package = true
+
+[tool.ruff]
+target-version = "py313"  # highest currently available
+line-length = 88
+
+[tool.ruff.lint]
+# Keep your existing selection
+select = ["F", "I", "E", "W", "UP"]
+
+[tool.ty.environment]
+# This is the most common fix for src-layout diagnostics
+# It tells ty where the 'First Party' code starts.
+extra-paths = ["src"]
+
+[tool.ty.analysis]
+# Ensure ty respects your existing type ignores from other checkers
+respect-type-ignore-comments = true
+
+[tool.pytest.ini_options]
+# This tells pytest: "Always look inside 'src' for my packages, and 'tests' for my tests
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "--cov=AAI --cov-report=term-missing --cov-report=html --cov-report=xml"
+
+[tool.coverage.run]
+source = ["."]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
+[project.scripts]
+# this is main() in src/AAI/main.py
+main = "AAI.main:main"

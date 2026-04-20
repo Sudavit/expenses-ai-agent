@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: write       # REQUIRED: To push the badge data to the orphan branch
+  pull-requests: write  # REQUIRED: To post the coverage report comment
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Lint with Ruff
+        run: uv run ruff check .
+
+      - name: Type check with Ty
+        run: uv run ty check .
+
+      - name: Run Tests
+        run: uv run pytest -s --cov-fail-under=90
+
+      - name: Generate Coverage Badge
+        if: github.ref == 'refs/heads/master'
+        run: |
+          # genbadge reads coverage.xml and outputs to root
+          uv run genbadge coverage -i coverage.xml -o coverage.svg
+
+      - name: Commit Badge
+        if: github.ref == 'refs/heads/master'
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add coverage.svg
+          # The [skip ci] is the "Kill-Switch" to prevent infinite loops
+          git commit -m "ci: update coverage badge [skip ci]" || echo "No changes to commit"
+          git push
+
+      - name: Update Benchmark History
+        if: github.ref == 'refs/heads/master' # Only track history on master
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add benchmark_history.jsonl
+          git commit -m "chore: update benchmark history [skip ci]" || echo "No changes to commit"
+          git push

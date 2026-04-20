@@ -1,0 +1,41 @@
+default_stages: [pre-commit, pre-push]  # This makes all hooks run on both
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        name: check yaml
+        args: ['--allow-multiple-documents']
+        # The key is to ensure the regex matches the hidden dot
+        # files: ^\.?.*\.(yaml|yml)$
+        files: \.(yaml|yml)$
+        pass_filenames: true
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version: https://github.com/astral-sh/ruff/releases
+    rev: v0.9.0
+    hooks:
+      # linter + imports
+      - id: ruff
+        args: [ --fix, --extend-select=I ]
+      # formatter
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty check
+        entry: uv run ty check
+        language: system
+        pass_filenames: false
+
+      - id: pytest-push
+        name: pytest (pre-push)
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push, manual]
