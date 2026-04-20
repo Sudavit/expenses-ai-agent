@@ -1,5 +1,5 @@
 def main(args: list[str] | None = None):
-    print("hello from AAI")
+    print("hello from expenses_ai_agent")
 
 
 if __name__ == "__main__":

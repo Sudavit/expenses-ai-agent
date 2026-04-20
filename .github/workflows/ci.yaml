@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, "week*" ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, "week*" ]
 
 permissions:
   contents: write       # REQUIRED: To push the badge data to the orphan branch
@@ -38,13 +38,11 @@ jobs:
         run: uv run pytest -s --cov-fail-under=90
 
       - name: Generate Coverage Badge
-        if: github.ref == 'refs/heads/master'
         run: |
           # genbadge reads coverage.xml and outputs to root
           uv run genbadge coverage -i coverage.xml -o coverage.svg
 
       - name: Commit Badge
-        if: github.ref == 'refs/heads/master'
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
