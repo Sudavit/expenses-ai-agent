@@ -10,4 +10,6 @@
 - [x] GREEN: Make them pass
 - [x] RED: Download and run ExpenseCategory tests
 - [x] GREEN: Make them pass
+- [x] RED: Download and run custom exception test
+- [ ] GREEN: Make it pass
 - [ ] Update badge generation to report coverage on all branches
