@@ -1,7 +1,8 @@
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
-from expenses_ai_agent.storage.models import Currency, ExpenseCategory
+from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
 
 
 class TestCurrencyEnum:

@@ -1,4 +1,9 @@
+from datetime import UTC, datetime
+from decimal import Decimal
 from enum import UNIQUE, StrEnum, verify
+from typing import Any, Self
+
+from sqlmodel import Field, SQLModel
 
 
 @verify(UNIQUE)
@@ -29,3 +34,23 @@ class ExpenseCategory(StrEnum):
     GIFTS = ("Gifts",)
     INVESTMENTS = ("Investments",)
     OTHER = ("Other",)
+
+
+class Expense(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    amount: Decimal | None = Field(default=Decimal("0.00"))
+    currency: Currency | None = Field(default=Currency.EUR)
+    date: datetime | None = Field(default_factory=lambda: datetime.now(UTC))
+    description: str | None = Field(default="No description provided")
+    telegram_user_id: int | None = None
+    category: ExpenseCategory | None = Field(default=ExpenseCategory.OTHER)
+
+    @classmethod
+    def create(cls, **kwargs: Any) -> Self:
+        """
+        Factory method to create an Expense using keyword arguments.
+        Strictly forbidden: float-based currency operations.
+        """
+        # kwargs now collects amount, currency, description, etc. into a dict
+        # and we unpack them again into the constructor.
+        return cls(**kwargs)

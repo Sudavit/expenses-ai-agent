@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "AI Agent to track expenses"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.13.3",
+    "sqlmodel>=0.0.38",
+]
 
 [dependency-groups]
 dev = [
