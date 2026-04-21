@@ -36,11 +36,15 @@ class ExpenseCategory(StrEnum):
     OTHER = ("Other",)
 
 
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
 class Expense(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    amount: Decimal | None = Field(default=Decimal("0.00"))
-    currency: Currency | None = Field(default=Currency.EUR)
-    date: datetime | None = Field(default_factory=lambda: datetime.now(UTC))
+    amount: Decimal = Field(default=Decimal("0.00"))
+    currency: Currency = Field(default=Currency.EUR)
+    date: datetime = Field(default_factory=_utc_now)
     description: str | None = Field(default="No description provided")
     telegram_user_id: int | None = None
     category: ExpenseCategory | None = Field(default=ExpenseCategory.OTHER)
