@@ -19,5 +19,5 @@
 - [x] RED: Download and run InMemoryExpenseRepository tests
 - [x] GREEN: Make them pass
 - [x] Remove "hello" chatter from main
-- [ ] Return to 100% coverage.
+- [x] Return to 100% coverage.
 - [ ] Update badge generation to report coverage on all branches
