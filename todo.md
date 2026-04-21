@@ -20,4 +20,4 @@
 - [x] GREEN: Make them pass
 - [x] Remove "hello" chatter from main
 - [x] Return to 100% coverage.
-- [ ] Update badge generation to report coverage on all branches
+- [x] Update badge generation to report coverage on all branches
