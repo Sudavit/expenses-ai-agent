@@ -12,6 +12,8 @@
 - [x] GREEN: Make them pass
 - [x] RED: Download and run custom exception test
 - [x] GREEN: Make it pass
-- [x] RED: Download and run Expense test
+- [x] RED: Download and run Expense tests
+- [x] GREEN: Make it pass
+- [x] RED: Download and run ExpenseRepository tests
 - [ ] GREEN: Make it pass
 - [ ] Update badge generation to report coverage on all branches
