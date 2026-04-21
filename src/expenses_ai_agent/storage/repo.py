@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Expense, ExpenseCategory
 
 
@@ -20,7 +21,7 @@ class ExpenseRepository[T](ABC):
         ...
 
     @abstractmethod
-    def delete(self, entity: T) -> None:
+    def delete(self, id: int) -> None:
         """Delete an entity from the repository."""
         ...
 
@@ -63,11 +64,11 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         else:
             return None
 
-    def delete(self, entity: Expense) -> None:
+    def delete(self, id: int) -> None:
         """Delete an entity from the repository."""
-        self.repo = {
-            id: expense for id, expense in self.repo.items() if expense != entity
-        }
+        if id not in self.repo:
+            raise ExpenseNotFoundError
+        del self.repo[id]
 
     def search_by_category(self, category: ExpenseCategory) -> list[Expense] | None:
         result = [
