@@ -67,7 +67,7 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
     def delete(self, id: int) -> None:
         """Delete an entity from the repository."""
         if id not in self.repo:
-            raise ExpenseNotFoundError
+            raise ExpenseNotFoundError(id)
         del self.repo[id]
 
     def search_by_category(self, category: ExpenseCategory) -> list[Expense] | None:
