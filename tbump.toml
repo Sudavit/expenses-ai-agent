@@ -1,0 +1,20 @@
+[package]
+name = "expenses-ai-agent"
+version = "v0.1.0"
+
+[history]
+# This will automatically prepend to your changelog if configured
+path = "CHANGELOG.md"
+
+[git]
+message_template = "bump: version {new_version}"
+tag_template = "v{new_version}"
+
+# Define every file where the version string exists
+[[file]]
+src = "pyproject.toml"
+search = 'version = "{current_version}"'
+
+[[before_commit]]
+name = "Check tests"
+cmd = "uv run prek && uv run pytest"

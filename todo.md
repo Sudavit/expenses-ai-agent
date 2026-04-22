@@ -22,3 +22,4 @@
 - [x] Return to 100% coverage.
 - [x] Update badge generation to report coverage on all branches
 - [x] Better badge generation: no more .svg file noise.
+- [ ] Install and configure tbump
