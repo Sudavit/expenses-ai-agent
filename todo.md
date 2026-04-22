@@ -21,3 +21,4 @@
 - [x] Remove "hello" chatter from main
 - [x] Return to 100% coverage.
 - [x] Update badge generation to report coverage on all branches
+- [x] Better badge generation: no more .svg file noise.
