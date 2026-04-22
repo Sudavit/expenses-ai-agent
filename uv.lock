@@ -242,7 +242,6 @@ source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
     { name = "sqlmodel" },
-    { name = "tbump" },
 ]
 
 [package.dev-dependencies]
@@ -255,6 +254,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "tbump" },
     { name = "ty" },
 ]
 
@@ -262,7 +262,6 @@ dev = [
 requires-dist = [
     { name = "pydantic", specifier = ">=2.13.3" },
     { name = "sqlmodel", specifier = ">=0.0.38" },
-    { name = "tbump", specifier = ">=6.11.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -275,6 +274,7 @@ dev = [
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "ruff", specifier = ">=0.15.9" },
+    { name = "tbump", specifier = ">=6.11.0" },
     { name = "ty", specifier = ">=0.0.28" },
 ]
 

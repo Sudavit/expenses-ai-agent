@@ -1,16 +1,18 @@
-[package]
-name = "expenses-ai-agent"
-version = "v0.1.0"
-
-[history]
-# This will automatically prepend to your changelog if configured
-path = "CHANGELOG.md"
+[version]
+current = "0.1.0"
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (?P<extra>.*)
+'''
 
 [git]
 message_template = "bump: version {new_version}"
 tag_template = "v{new_version}"
 
-# Define every file where the version string exists
 [[file]]
 src = "pyproject.toml"
 search = 'version = "{current_version}"'
