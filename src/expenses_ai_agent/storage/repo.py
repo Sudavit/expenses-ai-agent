@@ -47,11 +47,16 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         self.repo: dict[int, Expense] = dict()
         self.index: int = 0
 
+    def _unique_id(self):
+        increment = 1
+        assert increment == 1
+        self.index += increment
+        return self.index
+
     def add(self, entity: Expense) -> None:
         """Add a new entity to the repository."""
-        self.index += 1
-        entity.id = self.index
-        self.repo[self.index] = entity
+        entity.id = self._unique_id()
+        self.repo[entity.id] = entity
 
     def get(self, id: int) -> Expense | None:
         """Read an entity from the repository."""

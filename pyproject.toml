@@ -13,13 +13,14 @@ dependencies = [
 dev = [
     "genbadge[coverage]>=1.1.3",
     "line-profiler>=5.0.2",
-    "pandas>=3.0.1",        # to analyze performance
+    "pandas>=3.0.1", # to analyze performance
     "prek>=0.3.8",
-    "pyinstrument>=5.1.2",  # to analyze performance
+    "pyinstrument>=5.1.2", # to analyze performance
     "pytest-cov>=7.1.0",
     "pytest>=9.0.2",
     "ruff>=0.15.9",
     "ty>=0.0.28",
+    "mutmut>=3.5.0",
 ]
 
 [build-system]
@@ -68,6 +69,10 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "\\.\\.\\."
 ]
+
+[tool.mutmut]
+   paths = ["src"]
+   test_runner = "pytest"
 
 [project.scripts]
 # this is main() in src/expenses_ai_agent/main.py
