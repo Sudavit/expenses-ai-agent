@@ -240,6 +240,11 @@ class TestInMemoryExpenseRepository:
 
         assert len(expenses) == 2
 
+    def test_list_all_zero_expenses(self, repo):
+        """Should list all expenses."""
+        expenses = repo.get_all()
+        assert expenses == []
+
     def test_delete_expense(self, repo, sample_expense):
         """Should be able to delete an expense."""
         repo.add(sample_expense)
