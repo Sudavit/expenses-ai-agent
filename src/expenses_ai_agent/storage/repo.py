@@ -56,7 +56,7 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
     def get(self, id: int) -> Expense | None:
         """Read an entity from the repository."""
         if id not in self.repo:
-            raise ExpenseNotFoundError(id)
+            return None
         return self.repo[id]
 
     def get_all(self) -> list[Expense]:

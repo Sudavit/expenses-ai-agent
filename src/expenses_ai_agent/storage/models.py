@@ -22,18 +22,18 @@ class Currency(StrEnum):
 
 @verify(UNIQUE)
 class ExpenseCategory(StrEnum):
-    FOOD = ("Food",)
-    TRANSPORT = ("Transport",)
-    ENTERTAINMENT = ("Entertainment",)
-    SHOPPING = ("Shopping",)
-    HEALTH = ("Health",)
-    BILLS = ("Bills",)
-    EDUCATION = ("Education",)
-    TRAVEL = ("Travel",)
-    SERVICES = ("Services",)
-    GIFTS = ("Gifts",)
-    INVESTMENTS = ("Investments",)
-    OTHER = ("Other",)
+    FOOD = "Food"
+    TRANSPORT = "Transport"
+    ENTERTAINMENT = "Entertainment"
+    SHOPPING = "Shopping"
+    HEALTH = "Health"
+    BILLS = "Bills"
+    EDUCATION = "Education"
+    TRAVEL = "Travel"
+    SERVICES = "Services"
+    GIFTS = "Gifts"
+    INVESTMENTS = "Investments"
+    OTHER = "Other"
 
 
 def _utc_now() -> datetime:
@@ -50,7 +50,10 @@ class Expense(SQLModel, table=True):
     category: ExpenseCategory | None = Field(default=ExpenseCategory.OTHER)
 
     def __str__(self) -> str:
-        return f"{self.description or 'Expense'}: {self.amount} {self.currency.value} ({self.category.value})"
+        return (
+            f"{self.description or 'Expense'}: {self.amount} "
+            f"{self.currency.value} ({self.category})"
+        )
 
     @classmethod
     def create(cls, **kwargs: Any) -> Self:
