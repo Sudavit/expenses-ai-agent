@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from decimal import Decimal
-from enum import UNIQUE, StrEnum, verify, auto
+from enum import UNIQUE, StrEnum, auto, verify
 from typing import Any, Self
 
 from sqlmodel import Field, SQLModel
