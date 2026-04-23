@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from decimal import Decimal
-from enum import UNIQUE, StrEnum, verify
+from enum import UNIQUE, StrEnum, auto, verify
 from typing import Any, Self
 
 from sqlmodel import Field, SQLModel
@@ -8,32 +8,32 @@ from sqlmodel import Field, SQLModel
 
 @verify(UNIQUE)
 class Currency(StrEnum):
-    EUR = ("EUR",)
-    USD = ("USD",)
-    GBP = ("GBP",)
-    JPY = ("JPY",)
-    CHF = ("CHF",)
-    CAD = ("CAD",)
-    AUD = ("AUD",)
-    CNY = ("CNY",)
-    INR = ("INR",)
-    MXN = ("MXN",)
+    EUR = auto()
+    USD = auto()
+    GBP = auto()
+    JPY = auto()
+    CHF = auto()
+    CAD = auto()
+    AUD = auto()
+    CNY = auto()
+    INR = auto()
+    MXN = auto()
 
 
 @verify(UNIQUE)
 class ExpenseCategory(StrEnum):
-    FOOD = ("Food",)
-    TRANSPORT = ("Transport",)
-    ENTERTAINMENT = ("Entertainment",)
-    SHOPPING = ("Shopping",)
-    HEALTH = ("Health",)
-    BILLS = ("Bills",)
-    EDUCATION = ("Education",)
-    TRAVEL = ("Travel",)
-    SERVICES = ("Services",)
-    GIFTS = ("Gifts",)
-    INVESTMENTS = ("Investments",)
-    OTHER = ("Other",)
+    FOOD = auto()
+    TRANSPORT = auto()
+    ENTERTAINMENT = auto()
+    SHOPPING = auto()
+    HEALTH = auto()
+    BILLS = auto()
+    EDUCATION = auto()
+    TRAVEL = auto()
+    SERVICES = auto()
+    GIFTS = auto()
+    INVESTMENTS = auto()
+    OTHER = auto()
 
 
 def _utc_now() -> datetime:
@@ -46,8 +46,14 @@ class Expense(SQLModel, table=True):
     currency: Currency = Field(default=Currency.EUR)
     date: datetime = Field(default_factory=_utc_now)
     description: str | None = Field(default="No description provided")
-    telegram_user_id: int | None = None
+    telegram_user_id: int | None = Field(default=None)
     category: ExpenseCategory | None = Field(default=ExpenseCategory.OTHER)
+
+    def __str__(self) -> str:
+        return (
+            f"{self.description or 'Expense'}: {self.amount} "
+            f"{self.currency.value} ({self.category})"
+        )
 
     @classmethod
     def create(cls, **kwargs: Any) -> Self:
