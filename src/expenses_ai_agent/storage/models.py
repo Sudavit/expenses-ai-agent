@@ -8,16 +8,16 @@ from sqlmodel import Field, SQLModel
 
 @verify(UNIQUE)
 class Currency(StrEnum):
-    EUR = ("EUR",)
-    USD = ("USD",)
-    GBP = ("GBP",)
-    JPY = ("JPY",)
-    CHF = ("CHF",)
-    CAD = ("CAD",)
-    AUD = ("AUD",)
-    CNY = ("CNY",)
-    INR = ("INR",)
-    MXN = ("MXN",)
+    EUR = "EUR"
+    USD = "USD"
+    GBP = "GBP"
+    JPY = "JPY"
+    CHF = "CHF"
+    CAD = "CAD"
+    AUD = "AUD"
+    CNY = "CNY"
+    INR = "INR"
+    MXN = "MXN"
 
 
 @verify(UNIQUE)
@@ -46,8 +46,11 @@ class Expense(SQLModel, table=True):
     currency: Currency = Field(default=Currency.EUR)
     date: datetime = Field(default_factory=_utc_now)
     description: str | None = Field(default="No description provided")
-    telegram_user_id: int | None = None
+    telegram_user_id: int | None = Field(default=None)
     category: ExpenseCategory | None = Field(default=ExpenseCategory.OTHER)
+
+    def __str__(self) -> str:
+        return f"{self.description or 'Expense'}: {self.amount} {self.currency.value} ({self.category.value})"
 
     @classmethod
     def create(cls, **kwargs: Any) -> Self:

@@ -21,6 +21,9 @@ class ExpenseRepository[T](ABC):
         ...
 
     @abstractmethod
+    def update(self, id: int, entity: T) -> None: ...
+
+    @abstractmethod
     def delete(self, id: int) -> None:
         """Delete an entity from the repository."""
         ...
@@ -53,16 +56,15 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
     def get(self, id: int) -> Expense | None:
         """Read an entity from the repository."""
         if id not in self.repo:
-            return None
+            raise ExpenseNotFoundError(id)
         return self.repo[id]
 
-    def get_all(self) -> list[Expense] | None:
+    def get_all(self) -> list[Expense]:
         """Get all entities from the repository."""
-        all = list(self.repo.values())
-        if all:
-            return all
-        else:
-            return None
+        return list(self.repo.values())
+
+    def update(self, id: int, entity: Expense) -> None:
+        self.repo[id] = entity
 
     def delete(self, id: int) -> None:
         """Delete an entity from the repository."""
@@ -71,8 +73,8 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         del self.repo[id]
 
     def search_by_category(self, category: ExpenseCategory) -> list[Expense] | None:
+        """Search repository for a category."""
         result = [
             expense for id, expense in self.repo.items() if expense.category == category
         ]
-        """Search repository for a category."""
         return result
