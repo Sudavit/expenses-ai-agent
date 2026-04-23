@@ -1,12 +1,13 @@
-# fix everything below that contains "AAI"
-
 [project]
-name = "AAI"
+name = "expenses_ai_agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI Agent to track expenses"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.13.3",
+    "sqlmodel>=0.0.38",
+]
 
 [dependency-groups]
 dev = [
@@ -26,7 +27,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/AAI"]
+packages = ["src/expenses_ai_agent"]
 
 [tool.uv]
 managed = true
@@ -53,7 +54,7 @@ respect-type-ignore-comments = true
 # This tells pytest: "Always look inside 'src' for my packages, and 'tests' for my tests
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "--cov=AAI --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "--cov=expenses_ai_agent --cov-report=term-missing --cov-report=html --cov-report=xml"
 
 [tool.coverage.run]
 source = ["."]
@@ -65,8 +66,9 @@ exclude_lines = [
     "def __repr__",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
+    "\\.\\.\\."
 ]
 
 [project.scripts]
-# this is main() in src/AAI/main.py
-main = "AAI.main:main"
+# this is main() in src/expenses_ai_agent/main.py
+main = "expenses_ai_agent.main:main"

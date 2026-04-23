@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from AAI.main import main as benchmark  # change AI to name of project.
+from expenses_ai_agent.main import main as benchmark  # change AI to name of project.
 
 # Change the skip logic and the environment tag
 is_ci = os.getenv("GITHUB_ACTIONS") == "true"

@@ -1,7 +1,7 @@
 import pyinstrument
 
 # replace AI.main by the directory containing main.py
-from AAI.main import main
+from expenses_ai_agent.main import main
 
 # for example, if it's src/foo/main.py,
 # this becomes "from foo.main import main"

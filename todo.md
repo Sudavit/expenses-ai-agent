@@ -1,0 +1,24 @@
+# Expenses Demo Project - Roadmap
+## Week 1: Scaffolding
+- [x] Create `expenses-ai-agent` repo from template
+- [x] Annotated tag version v0.1.0
+- [x] Tweak as instructed in README.md
+- [x] Clone, add dependencies, setup venv, sync
+- [x] Linting and pytest succeed
+- [x] Create branch for week1 and push to origin
+- [x] RED: Download and run Currency tests
+- [x] GREEN: Make them pass
+- [x] RED: Download and run ExpenseCategory tests
+- [x] GREEN: Make them pass
+- [x] RED: Download and run custom exception test
+- [x] GREEN: Make it pass
+- [x] RED: Download and run Expense tests
+- [x] GREEN: Make it pass
+- [x] RED: Download and run ExpenseRepository tests
+- [x] GREEN: Make it pass
+- [x] RED: Download and run InMemoryExpenseRepository tests
+- [x] GREEN: Make them pass
+- [x] Remove "hello" chatter from main
+- [x] Return to 100% coverage.
+- [x] Update badge generation to report coverage on all branches
+- [x] Better badge generation: no more .svg file noise.

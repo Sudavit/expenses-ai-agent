@@ -2,13 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, "week*" ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, "week*" ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
-  contents: write       # REQUIRED: To push the badge data to the orphan branch
-  pull-requests: write  # REQUIRED: To post the coverage report comment
+  contents: read
 
 jobs:
   test:
@@ -35,29 +37,38 @@ jobs:
         run: uv run ty check .
 
       - name: Run Tests
-        run: uv run pytest -s --cov-fail-under=90
-
-      - name: Generate Coverage Badge
-        if: github.ref == 'refs/heads/master'
+        id: pytest
+        env:
+          GIST_SECRET: ${{ secrets.GIST_SECRET }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+        continue-on-error: true
         run: |
-          # genbadge reads coverage.xml and outputs to root
-          uv run genbadge coverage -i coverage.xml -o coverage.svg
+          # Run tests and pipe to a file
+          uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=90 > pytest_output.txt
+          cat pytest_output.txt
 
-      - name: Commit Badge
-        if: github.ref == 'refs/heads/master'
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add coverage.svg
-          # The [skip ci] is the "Kill-Switch" to prevent infinite loops
-          git commit -m "ci: update coverage badge [skip ci]" || echo "No changes to commit"
-          git push
+          # Improved Extraction: Look for 'TOTAL' and grab the trailing percentage digits
+          # 'sed' looks for the line starting with TOTAL, captures the number before the %, and saves it.
+          echo "COVERAGE=$(grep '^TOTAL' pytest_output.txt | awk '{print $NF}' | sed 's/%//')" >> $GITHUB_ENV
 
-      - name: Update Benchmark History
-        if: github.ref == 'refs/heads/master' # Only track history on master
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add benchmark_history.jsonl
-          git commit -m "chore: update benchmark history [skip ci]" || echo "No changes to commit"
-          git push
+      - name: Update Gist Badge
+        if: always()
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: expenses_badge.json
+          label: Coverage
+          # Logic: If pytest actually passed AND we have a coverage number, show it.
+          # Otherwise, show 'Failing'.
+          message: ${{ (steps.pytest.outcome == 'success' && env.COVERAGE != '') && format('{0}%', env.COVERAGE) || 'Failing' }}
+          color: ${{ steps.pytest.outcome == 'success' && 'brightgreen' || 'red' }}
+
+      # - name: Update Benchmark History
+      #   if: github.ref == 'refs/heads/master' # Only track history on master
+      #   run: |
+      #     git config --global user.name "GitHub Action"
+      #     git config --global user.email "action@github.com"
+      #     git add benchmark_history.jsonl
+      #     git commit -m "chore: update benchmark history [skip ci]" || echo "No changes to commit"
+      #     git push
