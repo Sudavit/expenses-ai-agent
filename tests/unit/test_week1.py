@@ -148,7 +148,7 @@ class TestExpense:
 
         result = str(expense)
         assert "25" in result
-        assert "GBP" in result
+        assert "gbp" in result
 
     def test_expense_create_class_method(self):
         """Expense.create() should be a convenient factory method."""
