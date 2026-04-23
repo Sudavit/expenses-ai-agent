@@ -241,7 +241,7 @@ class TestInMemoryExpenseRepository:
         assert len(expenses) == 2
 
     def test_list_all_zero_expenses(self, repo):
-        """Should list all expenses."""
+        """Listing expenses on an empty repository should return an empty list."""
         expenses = repo.get_all()
         assert expenses == []
 
