@@ -22,3 +22,6 @@
 - [x] Return to 100% coverage.
 - [x] Update badge generation to report coverage on all branches
 - [x] Better badge generation: no more .svg file noise.
+- [x] Install and configure tbump
+- [x] Merge code-review, PR pull requests from JuanJo & Bob
+- [x] Add mutmut coverage
