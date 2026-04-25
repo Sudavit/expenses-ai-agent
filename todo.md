@@ -25,3 +25,6 @@
 - [x] Install and configure tbump
 - [x] Merge code-review, PR pull requests from JuanJo & Bob
 - [x] Add mutmut coverage
+- [x] Incorporate fixes from Gemini code review
+## Week 2: LLM Integration
+- [ ] Add tests_week2

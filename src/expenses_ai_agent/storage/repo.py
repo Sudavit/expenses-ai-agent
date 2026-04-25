@@ -29,7 +29,7 @@ class ExpenseRepository[T](ABC):
         ...
 
     @abstractmethod
-    def search_by_category(self, category: ExpenseCategory) -> list[T] | None:
+    def search_by_category(self, category: ExpenseCategory) -> list[T]:
         """Search repository for a category."""
         ...
 
@@ -48,9 +48,7 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         self.index: int = 0
 
     def _unique_id(self):
-        increment = 1
-        assert increment == 1
-        self.index += increment
+        self.index += 1
         return self.index
 
     def add(self, entity: Expense) -> None:
@@ -77,7 +75,7 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
             raise ExpenseNotFoundError(id)
         del self.repo[id]
 
-    def search_by_category(self, category: ExpenseCategory) -> list[Expense] | None:
+    def search_by_category(self, category: ExpenseCategory) -> list[Expense]:
         """Search repository for a category."""
         result = [
             expense for id, expense in self.repo.items() if expense.category == category
