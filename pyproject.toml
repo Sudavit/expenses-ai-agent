@@ -1,6 +1,6 @@
 [project]
 name = "expenses_ai_agent"
-version = "0.2.0"
+version = "0.2.1"
 description = "AI Agent to track expenses"
 readme = "README.md"
 requires-python = ">=3.12"
