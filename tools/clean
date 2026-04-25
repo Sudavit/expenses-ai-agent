@@ -1,0 +1,4 @@
+#!/bin/bash -eu
+# clean temporary files
+
+git clean -dfx --exclude .venv/ "$@"
