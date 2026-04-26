@@ -67,7 +67,10 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         return list(self.repo.values())
 
     def update(self, id: int, entity: Expense) -> None:
-        self.repo[id] = entity
+        if id not in self.repo:
+            raise ExpenseNotFoundError(id)
+        entity.id = id
+        self.repo[entity.id] = entity
 
     def delete(self, id: int) -> None:
         """Delete an entity from the repository."""
