@@ -211,3 +211,6 @@ __marimo__/
 
 # mutmut
 mutants
+
+# for expenses-ai-agent
+.env
