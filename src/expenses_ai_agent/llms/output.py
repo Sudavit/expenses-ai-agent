@@ -10,12 +10,33 @@ Create `ExpenseCategorizationResponse` in `llms/output.py`. It needs these field
 | `cost` | `Decimal` | `Field(default=Decimal("0"), description="Leave as 0 — set programmatically after the API call")` |
 | `comments` | `str \| None` | optional, defaults to `None` |
 | `timestamp` | `datetime` | auto-set via `default_factory` |
+"""  # noqa: E501
 
-The `Field(description=...)` on each field is important — OpenAI's structured output passes the description to the LLM, which uses it to know what value to fill in. Without descriptions, the LLM may fill numeric fields with `0`.
+from datetime import UTC, datetime
+from decimal import Decimal
 
-`uv run pytest tests/unit/test_week2.py -k TestExpenseCategorizationResponse` (5 tests)
-"""
+from pydantic import BaseModel
+from sqlmodel import Field
+
+from expenses_ai_agent.storage.models import Currency
 
 
-class ExpenseCategorizationResponse:
-    pass
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+class ExpenseCategorizationResponse(BaseModel):
+    category: str
+    total_amount: Decimal = Field(
+        description="Numeric amount extracted from the expense description"
+    )
+    currency: Currency = Field(
+        description="Currency code from the description, default EUR"
+    )
+    confidence: float = Field(description="Confidence score 0.0-1.0")
+    cost: Decimal = Field(
+        default=Decimal("0"),
+        description="Leave as 0 — set programmatically after the API call",
+    )
+    comments: str | None = None
+    timestamp: datetime = Field(default_factory=_utc_now)
