@@ -1,5 +1,27 @@
 from decimal import Decimal
 
+import requests
+from decouple import config
+
+EXCHANGE_RATE_API_KEY = config("EXCHANGE_RATE_API_KEY")
+
 
 def convert_currency(amount: Decimal, from_currency: str, to_currency: str) -> Decimal:
-    pass
+    """
+    - If `from_currency == to_currency`, return `amount` unchanged (no API call)
+    - Otherwise use `requests.get` to call the ExchangeRate API pair endpoint:
+      `https://v6.exchangerate-api.com/v6/{API_KEY}/pair/{from_currency}/{to_currency}`
+    - The response JSON contains a `conversion_rate` key — multiply `amount` by it
+    - Load `EXCHANGE_RATE_API_KEY` from environment variables via `python-decouple`
+    """
+    if from_currency == to_currency:
+        return amount
+
+    response = requests.get(
+        f"https://v6.exchangerate-api.com/v6/{EXCHANGE_RATE_API_KEY}/pair/{from_currency}/{to_currency}/{amount}"
+    )
+    data = response.json()
+    if data["result"] != "success":
+        print(f"Error: {data['error-type']}")
+    rate = Decimal(data["conversion_rate"])
+    return rate * amount
