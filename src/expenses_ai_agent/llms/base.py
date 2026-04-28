@@ -8,6 +8,8 @@
   - `get_available_models(self) -> Sequence[str]`
 """
 
+# TODO:  collections.abc.Sequence == 'typing.Sequence'
+# and the latter is deprecated
 from collections.abc import Sequence
 from decimal import Decimal
 from enum import StrEnum, auto
