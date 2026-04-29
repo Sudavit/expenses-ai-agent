@@ -27,4 +27,17 @@
 - [x] Add mutmut coverage
 - [x] Incorporate fixes from Gemini code review
 ## Week 2: LLM Integration
-- [ ] Add tests_week2
+- [x] Add tests_week2
+- [x] Install Dependencies
+- [x] Set Up Environment Variables
+- [x] Create Package Structure
+- [x] Create ExpenseCategorizationResponse
+- [x] Define Type Aliases and Protocol
+- [x] Implement Currency Conversion
+- [x] Implement Date Formatter
+- [x] Define Tool Schemas
+- [x] Implement OpenAIAssistant
+- [ ] Tag 0.3.0-beta
+= [ ] Get code review on beta
+- [ ] merge to master
+- [ ] Tag 0.3.0
