@@ -28,7 +28,7 @@ class OpenAIAssistant:
         else:
             self.api_key = api_key
         self.model = model
-        self.client = OpenAI()
+        self.client = OpenAI(api_key=self.api_key)
 
     def completion(self, messages: Messages) -> ExpenseCategorizationResponse | None:
         response = self.client.beta.chat.completions.parse(
