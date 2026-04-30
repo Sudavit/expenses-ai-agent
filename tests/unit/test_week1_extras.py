@@ -52,7 +52,10 @@ class TestInMemoryExpenseRepositoryExtras:
         assert new_sample_expense.description == sample_expense_2.description
         assert new_sample_expense.id == old_sample_expense.id
 
-    def test_get_nonexistent_returns_none(self, repo, sample_expense_2):
+    def test_update_nonexistent_raises(self, repo, sample_expense_2):
         """Updating a non-existent expense should raise ExpenseNotFoundError."""
         with pytest.raises(ExpenseNotFoundError):
             repo.update(999, sample_expense_2)
+
+    def test_get_nonexistent_returns_none(self, repo):
+        assert repo.get(999) is None
