@@ -9,6 +9,7 @@ Use `client.beta.chat.completions.parse()` — OpenAI's structured output API th
 **None checks required:** The OpenAI SDK types `message.parsed` as `ExpenseCategorizationResponse | None` and `response.usage` as `CompletionUsage | None`. Your `completion` implementation must handle both:
 """  # noqa: E501
 
+from collections.abc import Sequence
 from decimal import Decimal
 from typing import Any, cast
 
@@ -50,7 +51,6 @@ class OpenAIAssistant:
         # do something here
         return Decimal("0.00")
 
-    # def get_available_models(self) -> Sequence[str]:
-    def get_available_models(self) -> list[str]:
+    def get_available_models(self) -> Sequence[str]:
         models = [model.id for model in self.client.models.list()]
         return models
