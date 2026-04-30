@@ -1,3 +1,6 @@
+import pytest
+
+from expenses_ai_agent.conf.config import SecretKey, UndefinedValueError, get_api_config
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
 )
@@ -33,3 +36,17 @@ class TestToolSchemas:
         assert "type" in params
         assert "properties" in params
         assert "required" in params
+
+
+class TestAPIConfig:
+    """Test ability to get API keys"""
+
+    def test_api_keys_accessible(self):
+        """All secret keys available"""
+        for api_key in SecretKey:
+            assert isinstance(get_api_config(api_key), str)
+
+    def test_bad_api_key_raises(self):
+        """Bad secret key raises exception"""
+        with pytest.raises(UndefinedValueError):
+            get_api_config("Sudavit")
