@@ -1,9 +1,13 @@
+from decimal import Decimal
+
 import pytest
 
 from expenses_ai_agent.conf.config import SecretKey, UndefinedValueError, get_api_config
+from expenses_ai_agent.storage.exceptions import CurrencyConversionError
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
 )
+from expenses_ai_agent.utils.currency import convert_currency
 from expenses_ai_agent.utils.date_formatter import format_datetime
 
 
@@ -50,3 +54,21 @@ class TestAPIConfig:
         """Bad secret key raises exception"""
         with pytest.raises(UndefinedValueError):
             get_api_config("Sudavit")
+
+
+class TestCurrencyExceptions:
+    """Tests for custom currency-conversion exceptions."""
+
+    def test_expense_not_found_error_exists(self):
+        """CurrencyConversionError should be a custom exception."""
+        error = CurrencyConversionError("This is a currency-conversion error")
+        assert isinstance(error, Exception)
+        assert "Currency conversion failure" in str(error)
+
+    def test_bad_currency_conversion_raises(self):
+        """Converting to a non-existing currency should raise an exception."""
+        with pytest.raises(CurrencyConversionError):
+            # convert to Canadian Tire Money
+            convert_currency(
+                amount=Decimal("1.00"), from_currency="CAD", to_currency="CTM"
+            )

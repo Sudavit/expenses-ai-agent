@@ -4,6 +4,7 @@ import requests
 
 # from decouple import config
 from expenses_ai_agent.conf.config import get_api_config
+from expenses_ai_agent.storage.exceptions import CurrencyConversionError
 
 EXCHANGE_RATE_API_KEY = get_api_config("EXCHANGE_RATE_API_KEY")
 
@@ -24,6 +25,6 @@ def convert_currency(amount: Decimal, from_currency: str, to_currency: str) -> D
     )
     data = response.json()
     if data["result"] != "success":
-        raise ValueError(f"{data['error-type']}")
+        raise CurrencyConversionError(f"{data['error-type']}")
     rate = Decimal(data["conversion_rate"])
     return rate * amount
