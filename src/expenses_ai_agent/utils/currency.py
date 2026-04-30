@@ -24,6 +24,6 @@ def convert_currency(amount: Decimal, from_currency: str, to_currency: str) -> D
     )
     data = response.json()
     if data["result"] != "success":
-        print(f"Error: {data['error-type']}")
+        raise ValueError(f"{data['error-type']}")
     rate = Decimal(data["conversion_rate"])
     return rate * amount
