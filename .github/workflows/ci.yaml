@@ -41,6 +41,8 @@ jobs:
         env:
           GIST_SECRET: ${{ secrets.GIST_SECRET }}
           GIST_ID: ${{ secrets.GIST_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
         continue-on-error: true
         run: |
           # Run tests and pipe to a file
