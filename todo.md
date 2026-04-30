@@ -37,7 +37,8 @@
 - [x] Implement Date Formatter
 - [x] Define Tool Schemas
 - [x] Implement OpenAIAssistant
-- [ ] Tag 0.3.0-beta
+- [x] Tag 0.3.0-beta
+- [ ] Fix code coverage badge on GitHub
 = [ ] Get code review on beta
 - [ ] merge to master
 - [ ] Tag 0.3.0
