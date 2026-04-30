@@ -10,10 +10,6 @@ Use `client.beta.chat.completions.parse()` — OpenAI's structured output API th
 """  # noqa: E501
 
 from decimal import Decimal
-
-# TODO:  collections.abc.Sequence == 'typing.Sequence'
-# and the latter is deprecated
-# from collections.abc import Sequence
 from typing import Any, cast
 
 # from decouple import config
