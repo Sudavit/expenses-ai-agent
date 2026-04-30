@@ -1,6 +1,6 @@
 """
 - `__init__(self, model: str = "gpt-4o-mini", api_key: str | None = None)` — loads `OPENAI_API_KEY` from env via `config()` if `api_key` is not passed; creates `OpenAI` client
-- `completion(self, messages: MESSAGES) -> ExpenseCategorizationResponse` — calls `client.beta.chat.completions.parse()` with `response_format=ExpenseCategorizationResponse`; sets `result.cost` from `calculate_cost()` before returning
+- `completion(self, messages: Messages) -> ExpenseCategorizationResponse` — calls `client.beta.chat.completions.parse()` with `response_format=ExpenseCategorizationResponse`; sets `result.cost` from `calculate_cost()` before returning
 - `calculate_cost(self, prompt_tokens: int, completion_tokens: int) -> Decimal` — return a cost estimate based on token counts
 - `get_available_models(self) -> list[str]` — calls `client.models.list()` and returns model IDs
 
@@ -20,7 +20,7 @@ from typing import Any, cast
 from openai import OpenAI
 
 from expenses_ai_agent.conf.config import get_api_config
-from expenses_ai_agent.llms.base import MESSAGES
+from expenses_ai_agent.llms.base import Messages
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 
 
@@ -33,7 +33,7 @@ class OpenAIAssistant:
         self.model = model
         self.client = OpenAI()
 
-    def completion(self, messages: MESSAGES) -> ExpenseCategorizationResponse | None:
+    def completion(self, messages: Messages) -> ExpenseCategorizationResponse | None:
         response = self.client.beta.chat.completions.parse(
             model=self.model,
             messages=cast(Any, messages),
