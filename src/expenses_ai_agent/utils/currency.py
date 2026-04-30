@@ -20,7 +20,7 @@ def convert_currency(amount: Decimal, from_currency: str, to_currency: str) -> D
         return amount
 
     response = requests.get(
-        f"https://v6.exchangerate-api.com/v6/{EXCHANGE_RATE_API_KEY}/pair/{from_currency}/{to_currency}/{amount}"
+        f"https://v6.exchangerate-api.com/v6/{EXCHANGE_RATE_API_KEY}/pair/{from_currency}/{to_currency}"
     )
     data = response.json()
     if data["result"] != "success":
