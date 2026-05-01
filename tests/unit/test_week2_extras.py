@@ -4,12 +4,12 @@ import pytest
 
 from expenses_ai_agent.conf.config import SecretKey, UndefinedValueError, get_api_config
 from expenses_ai_agent.llms.exceptions import LLMParseError
-from expenses_ai_agent.storage.exceptions import CurrencyConversionError
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
 )
 from expenses_ai_agent.utils.currency import convert_currency
 from expenses_ai_agent.utils.date_formatter import format_datetime
+from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
 
 class TestDateFormatter:

@@ -4,7 +4,7 @@ import requests
 
 # from decouple import config
 from expenses_ai_agent.conf.config import get_api_config
-from expenses_ai_agent.storage.exceptions import CurrencyConversionError
+from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
 EXCHANGE_RATE_API_KEY = get_api_config("EXCHANGE_RATE_API_KEY")
 
