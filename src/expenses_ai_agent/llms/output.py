@@ -15,8 +15,7 @@ Create `ExpenseCategorizationResponse` in `llms/output.py`. It needs these field
 from datetime import UTC, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel
-from sqlmodel import Field
+from pydantic import BaseModel, Field
 
 from expenses_ai_agent.storage.models import Currency
 
