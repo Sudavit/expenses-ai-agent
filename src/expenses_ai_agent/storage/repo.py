@@ -81,6 +81,6 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
     def search_by_category(self, category: ExpenseCategory) -> list[Expense]:
         """Search repository for a category."""
         result = [
-            expense for id, expense in self.repo.items() if expense.category == category
+            expense for expense in self.repo.values() if expense.category == category
         ]
         return result
