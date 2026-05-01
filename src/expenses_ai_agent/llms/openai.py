@@ -18,6 +18,7 @@ from openai import OpenAI
 
 from expenses_ai_agent.conf.config import get_api_config
 from expenses_ai_agent.llms.base import Messages
+from expenses_ai_agent.llms.exceptions import LLMParseError
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 
 
@@ -38,7 +39,7 @@ class OpenAIAssistant:
         )
         result = response.choices[0].message.parsed
         if result is None:
-            raise ValueError("Failed to parse response from OpenAI")
+            raise LLMParseError("Failed to parse response from OpenAI")
 
         if response.usage:
             result.cost = self.calculate_cost(

@@ -3,6 +3,7 @@ from decimal import Decimal
 import pytest
 
 from expenses_ai_agent.conf.config import SecretKey, UndefinedValueError, get_api_config
+from expenses_ai_agent.llms.exceptions import LLMParseError
 from expenses_ai_agent.storage.exceptions import CurrencyConversionError
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
@@ -72,3 +73,13 @@ class TestCurrencyExceptions:
             convert_currency(
                 amount=Decimal("1.00"), from_currency="CAD", to_currency="CTM"
             )
+
+
+class TestLLMExceptions:
+    """Tests for custom LLM exceptions."""
+
+    def test_llmparse_error_exists(self):
+        """LLMParseError should be a custom exception."""
+        error = LLMParseError("This is an LLM parsing error")
+        assert isinstance(error, Exception)
+        assert "LLM parsing" in str(error)
