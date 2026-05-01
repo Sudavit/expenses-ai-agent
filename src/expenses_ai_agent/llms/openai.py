@@ -49,7 +49,25 @@ class OpenAIAssistant:
         return result
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int) -> Decimal:
-        # do something here
+        # OpenAI pricing page is here: https://openai.com/api/pricing/
+        price_per_million_tokens = {
+            "gpt-5.5": {
+                "input": Decimal("5.00"),
+                "cached_input": Decimal("0.50"),
+                "output": Decimal("30.00"),
+            },
+            "gpt-5.4": {
+                "input": Decimal("2.50"),
+                "cached_input": Decimal("0.25"),
+                "output": Decimal("15.00"),
+            },
+            "gpt-5.4-mini": {
+                "input": Decimal("0.75"),
+                "cached_input": Decimal("0.075"),
+                "output": Decimal("4.50"),
+            },
+        }
+        _ = price_per_million_tokens  # no whining about unused variable (F841)
         return Decimal("0.00")
 
     def get_available_models(self) -> Sequence[str]:
