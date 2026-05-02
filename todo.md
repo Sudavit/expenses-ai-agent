@@ -38,7 +38,8 @@
 - [x] Define Tool Schemas
 - [x] Implement OpenAIAssistant
 - [x] Tag 0.3.0-beta
-- [ ] Fix code coverage badge on GitHub
-= [ ] Get code review on beta
+- [x] Fix code coverage badge on GitHub
+= [x] Get code review on beta
+- [ ] Respond to PRs
 - [ ] merge to master
 - [ ] Tag 0.3.0
