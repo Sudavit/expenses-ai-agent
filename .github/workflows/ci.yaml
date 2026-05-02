@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ master, "week*", conf ]
+    branches: [ master, "week*", code-review ]
   pull_request:
-    branches: [ master, "week*", conf ]
+    branches: [ master, "week*", code-review ]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
