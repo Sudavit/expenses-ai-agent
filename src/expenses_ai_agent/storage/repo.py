@@ -36,11 +36,23 @@ class ExpenseRepository[T](ABC):
 
 class InMemoryExpenseRepository(ExpenseRepository[Expense]):
     """
-    Implement `InMemoryExpenseRepository` backed by a `dict[int, Expense]`.
-    The `add()` method assigns an auto-incrementing ID
-     by mutating `expense.id` on the passed-in object
-     — this mirrors how SQLAlchemy works:
-        `session.add(obj)` + `session.commit()` sets the ID on the original object too.
+    InMemoryExpenseRepository is an in-memory data layer implemented as a dict.
+    The basic CRUD operations are supported,
+    as are get_all(), which retrieves all Expense items as a list,
+    and search_by_category(), which looks for all elements with a specific ExpenseCategory
+
+    Once created, objects remain in the database until deleted.
+    The Create operation, add(), gives every new object put into the database a new ID.
+    IDs start at 1, and increment by 1 for every subsequent object.
+    No operations change IDs of objects in the database, once they're persisted.
+    For example, update(), changes the internal data of an existing object, but keeps the original ID.
+
+    This class, a "Fake" database, allows fast unit tests of my code with real results,
+    without the setup and maintenance costs of an industrial-strength database like SQLModel.
+    The price of an in-memory model is impermanence: no data persist across runs.
+
+    Because it's written as a child of an ABC, it lets me use a repository pattern,
+    which keeps the database implementation details from intruding into the rest of the code
     """
 
     def __init__(self):
