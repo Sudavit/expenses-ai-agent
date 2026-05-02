@@ -1,9 +1,8 @@
 from decimal import Decimal
 
 import pytest
+from decouple import UndefinedValueError, config
 
-# from expenses_ai_agent.conf.config import SecretKey, \
-# UndefinedValueError, get_api_config
 from expenses_ai_agent.llms.exceptions import LLMParseError
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
@@ -16,14 +15,10 @@ from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 class TestDateFormatter:
     """Tests for the date formatting utility."""
 
-    def test_format_datetime_with_timezone_additional(self):
-        """Should support timezone conversion."""
-        result_with_tz_str = format_datetime(
-            "2024-06-15T12:00:00+00:00", timezone_str="Europe/Madrid"
-        )
-        result_without_tz_str = format_datetime("2024-06-15T12:00:00+02:00")
-
-        assert result_with_tz_str == result_without_tz_str
+    def test_correctly_handling_implicit_tz(self):
+        result_hawaii = format_datetime("2000-01-01:00:00-10:00", timezone_str="HST")
+        result_gmt = format_datetime("2000-01-01:00:00")  # implicit UTC
+        assert result_hawaii[:-3] == result_gmt[:-3]
 
 
 class TestToolSchemas:
@@ -44,20 +39,19 @@ class TestToolSchemas:
         assert "required" in params
 
 
-# TODO: remove
-# class TestAPIConfig:
-#     """Test ability to get API keys"""
-#
-#     def test_api_keys_accessible(self):
-#         """All secret keys available"""
-#         for api_key in SecretKey:
-#             assert isinstance(get_api_config(api_key), str)
-#
-#     def test_bad_api_key_raises(self):
-#         """Bad secret key raises exception"""
-#         with pytest.raises(UndefinedValueError):
-#             get_api_config("Sudavit")
-#
+class TestAPIKeyConfig:
+    """Test ability to get API keys"""
+
+    def test_api_keys_accessible(self):
+        """All secret keys available, non-empty strings"""
+        for api_key in ["EXCHANGE_RATE_API_KEY", "OPENAI_API_KEY"]:
+            assert config(api_key, default="")
+            assert isinstance(api_key, str)
+
+    def test_bad_api_key_raises(self):
+        """Bad secret key raises exception"""
+        with pytest.raises(UndefinedValueError):
+            config("Sudavit")
 
 
 class TestCurrencyExceptions:
@@ -74,7 +68,10 @@ class TestCurrencyExceptions:
         with pytest.raises(CurrencyConversionError):
             # convert to Canadian Tire Money
             convert_currency(
-                amount=Decimal("1.00"), from_currency="CAD", to_currency="CTM"
+                # CTM == Canadian Tire Money
+                amount=Decimal("1.00"),
+                from_currency="CAD",
+                to_currency="CTM",
             )
 
 

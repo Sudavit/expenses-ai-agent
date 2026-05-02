@@ -13,7 +13,7 @@ from collections.abc import Sequence
 from decimal import Decimal
 from typing import Any, cast
 
-from decouple import config
+from decouple import UndefinedValueError, config
 from openai import OpenAI
 
 # from expenses_ai_agent.conf.config import get_api_config TODO: remove
@@ -43,9 +43,11 @@ PRICE_PER_MILLION_TOKENS = {
 class OpenAIAssistant:
     def __init__(self, model: str = "gpt-4o-mini", api_key: str | None = None):
         if api_key is None:
-            self.api_key = config("OPENAI_API_KEY")
+            self.api_key = config("OPENAI_API_KEY", default="")
         else:
             self.api_key = api_key
+        if not self.api_key:
+            raise UndefinedValueError("OPENAI_API_KEY must be set")
         self.model = model
         self.client = OpenAI(api_key=self.api_key)
 

@@ -1,12 +1,11 @@
 from decimal import Decimal
 
 import requests
-from decouple import config
+from decouple import UndefinedValueError, config
 
-# from expenses_ai_agent.conf.config import get_api_config TODO: remove
 from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
-EXCHANGE_RATE_API_KEY = config("EXCHANGE_RATE_API_KEY")
+EXCHANGE_RATE_API_KEY = config("EXCHANGE_RATE_API_KEY", default="")
 
 
 def convert_currency(amount: Decimal, from_currency: str, to_currency: str) -> Decimal:
@@ -17,6 +16,10 @@ def convert_currency(amount: Decimal, from_currency: str, to_currency: str) -> D
     - The response JSON contains a `conversion_rate` key — multiply `amount` by it
     - Load `EXCHANGE_RATE_API_KEY` from environment variables via `python-decouple`
     """
+
+    if not EXCHANGE_RATE_API_KEY:
+        raise UndefinedValueError("EXCHANGE_RATE_API_KEY must be set")
+
     if from_currency == to_currency:
         return amount
 
