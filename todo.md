@@ -40,6 +40,8 @@
 - [x] Tag 0.3.0-beta
 - [x] Fix code coverage badge on GitHub
 = [x] Get code review on beta
-- [ ] Respond to PRs
+- [ ] handle PRs on branch code-review
+- [ ] merge to week2
 - [ ] merge to master
+- [ ] delete old branches
 - [ ] Tag 0.3.0
