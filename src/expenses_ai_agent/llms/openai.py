@@ -16,7 +16,6 @@ from typing import Any, cast
 from decouple import UndefinedValueError, config
 from openai import OpenAI
 
-# from expenses_ai_agent.conf.config import get_api_config TODO: remove
 from expenses_ai_agent.llms.base import Messages
 from expenses_ai_agent.llms.exceptions import LLMParseError
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
