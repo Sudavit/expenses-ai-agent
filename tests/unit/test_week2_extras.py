@@ -2,10 +2,13 @@ from decimal import Decimal
 
 import pytest
 from decouple import UndefinedValueError, config
+from jsonschema import validate
 
 from expenses_ai_agent.llms.exceptions import LLMParseError
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
+    DATETIME_FORMATTER_TOOL,
+    OPENAI_TOOL_META_SCHEMA,
 )
 from expenses_ai_agent.utils.currency import convert_currency
 from expenses_ai_agent.utils.date_formatter import format_datetime
@@ -22,21 +25,12 @@ class TestDateFormatter:
 
 
 class TestToolSchemas:
-    """Tests for OpenAI-compatible tool schemas."""
+    # This validates the outer "envelope"
+    def test_currency_tool_has_required_structure(self):
+        validate(instance=CURRENCY_CONVERSION_TOOL, schema=OPENAI_TOOL_META_SCHEMA)
 
-    def test_currency_tool_has_required_structure_fixed(self):
-        """Tool schema should follow OpenAI function calling format."""
-        tool = CURRENCY_CONVERSION_TOOL
-        assert tool["type"] == "function"
-
-        assert "name" in tool
-        assert "description" in tool
-        assert "parameters" in tool
-
-        params = tool["parameters"]
-        assert "type" in params
-        assert "properties" in params
-        assert "required" in params
+    def test_datetime_tool_has_required_structure(self):
+        validate(instance=DATETIME_FORMATTER_TOOL, schema=OPENAI_TOOL_META_SCHEMA)
 
 
 class TestAPIKeyConfig:

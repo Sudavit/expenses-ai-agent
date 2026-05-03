@@ -5,6 +5,29 @@ Create `tools/tools.py` with two module-level dicts following the OpenAI tool sc
 - `DATETIME_FORMATTER_TOOL` — for `format_datetime`; `datetime_str` is required, `timezone_str` is optional
 """  # noqa: E501
 
+OPENAI_TOOL_META_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "type": {"const": "function"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "type": {"const": "object"},
+                "properties": {"type": "object"},
+                "required": {"type": "array", "items": {"type": "string"}},
+                "additionalProperties": {"type": "boolean"},
+            },
+            "required": ["type", "properties", "required", "additionalProperties"],
+            "additionalProperties": False,
+        },
+        "strict": {"type": "boolean"},
+    },
+    "required": ["type", "name", "description", "parameters"],
+    "additionalProperties": False,
+}
+
 CURRENCY_CONVERSION_TOOL = {
     "type": "function",
     "name": "convert_currency",
