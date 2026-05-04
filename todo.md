@@ -42,6 +42,7 @@
 = [x] Get code review on beta
 - [x] handle PRs on branch code-review
 - [x] merge to week2
-- [ ] merge to master
-- [ ] delete old branches
+- [x] merge to master
+- [x] delete old branches
+## Week 3: Classification Service and CLI
 - [ ] Tag 0.3.0
