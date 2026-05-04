@@ -271,7 +271,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf57
 
 [[package]]
 name = "expenses-ai-agent"
-version = "0.3.0b0"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
