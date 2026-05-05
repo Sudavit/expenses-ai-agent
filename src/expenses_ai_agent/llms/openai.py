@@ -50,7 +50,7 @@ class OpenAIAssistant:
         self.model = model
         self.client = OpenAI(api_key=self.api_key)
 
-    def completion(self, messages: Messages) -> ExpenseCategorizationResponse | None:
+    def completion(self, messages: Messages) -> ExpenseCategorizationResponse:
         response = self.client.beta.chat.completions.parse(
             model=self.model,
             messages=cast(Any, messages),
