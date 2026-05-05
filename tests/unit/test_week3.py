@@ -1,10 +1,12 @@
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, patch
 
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
+from typer.testing import CliRunner
 
+from expenses_ai_agent.cli.cli import app
 from expenses_ai_agent.llms.base import Assistant
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 from expenses_ai_agent.prompts.system import CLASSIFICATION_PROMPT
@@ -193,6 +195,9 @@ class TestClassificationService:
         assert messages[1]["role"] == "user"
 
 
+# Step 3: Implement Database Repository
+
+
 @pytest.fixture
 def db_engine():
     engine = create_engine("sqlite:///:memory:")
@@ -308,3 +313,75 @@ class TestDBExpenseRepo:
 
         user_100_expenses = repo.list_by_user(telegram_user_id=100)
         assert len(user_100_expenses) == 2
+
+
+# Step 4: Create CLI
+
+
+@pytest.fixture
+def cli_runner():
+    return CliRunner()
+
+
+@pytest.fixture
+def mock_classification_response():
+    return ExpenseCategorizationResponse(
+        category="Food",
+        total_amount=Decimal("5.50"),
+        currency=Currency.USD,
+        confidence=0.95,
+        cost=Decimal("0.001"),
+        comments="Coffee purchase",
+    )
+
+
+class TestCLIApp:
+    """Tests for CLI application."""
+
+    def test_cli_app_exists(self):
+        assert app is not None
+
+    def test_classify_command_exists(self, cli_runner):
+        result = cli_runner.invoke(app, ["classify", "--help"])
+        assert result.exit_code == 0
+
+    def test_classify_requires_description(self, cli_runner):
+        result = cli_runner.invoke(app, ["classify"])
+        assert result.exit_code != 0 or "missing" in result.output.lower()
+
+    def test_classify_with_mocked_service(
+        self, cli_runner, mock_classification_response
+    ):
+        with patch(
+            "expenses_ai_agent.cli.cli.ClassificationService"
+        ) as mock_service_cls:
+            mock_service = create_autospec(ClassificationService)
+            mock_result = create_autospec(ClassificationResult)
+            mock_result.response = mock_classification_response
+            mock_result.persisted = False
+            mock_service.classify.return_value = mock_result
+            mock_service_cls.return_value = mock_service
+
+            with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
+                result = cli_runner.invoke(app, ["Coffee at Starbucks $5.50"])
+                assert result.exit_code == 0 or "Food" in result.output
+
+    def test_classify_db_option_exists(self, cli_runner):
+        result = cli_runner.invoke(app, ["classify", "--help"])
+        assert "--db" in result.output or "database" in result.output.lower()
+
+    def test_cli_outputs_category_info(self, cli_runner, mock_classification_response):
+        with patch(
+            "expenses_ai_agent.cli.cli.ClassificationService"
+        ) as mock_service_cls:
+            mock_service = create_autospec(ClassificationService)
+            mock_result = create_autospec(ClassificationResult)
+            mock_result.response = mock_classification_response
+            mock_result.persisted = False
+            mock_service.classify.return_value = mock_result
+            mock_service_cls.return_value = mock_service
+
+            with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
+                result = cli_runner.invoke(app, ["Test expense"])
+                output = result.output
+                assert "Food" in output or "5.50" in output or "Category" in output
