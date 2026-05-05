@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
+
+from sqlmodel import Session, create_engine, select
 
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Expense, ExpenseCategory
@@ -32,6 +35,12 @@ class ExpenseRepository[T](ABC):
     def search_by_category(self, category: ExpenseCategory) -> list[T]:
         """Search repository for a category."""
         ...
+
+    @abstractmethod
+    def search_by_dates(self, start: datetime, end: datetime) -> list[T]: ...
+
+    @abstractmethod
+    def list_by_user(self, telegram_user_id: int) -> list[T]: ...
 
 
 class InMemoryExpenseRepository(ExpenseRepository[Expense]):
@@ -100,3 +109,72 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
             expense for expense in self.repo.values() if expense.category == category
         ]
         return result
+
+    def search_by_dates(self, start: datetime, end: datetime) -> list[Expense]:
+        """Search repository for expenses between a pair of dates."""
+        result = [
+            expense for expense in self.repo.values() if start <= expense.date <= end
+        ]
+        return result
+
+    def list_by_user(self, telegram_user_id: int) -> list[Expense]:
+        """Search repository for expenses by a particular user."""
+        result = [
+            expense
+            for expense in self.repo.values()
+            if expense.telegram_user_id == telegram_user_id
+        ]
+        return result
+
+
+class DBExpenseRepo(ExpenseRepository[Expense]):
+    def __init__(self, db_url: str, session: Session | None = None):
+        self._db_url = db_url
+        if session:
+            self._session = session
+            self._owns_session = False  # External session, don't close it
+        else:
+            engine = create_engine(db_url)
+            self._session = Session(engine)
+            self._owns_session = True
+
+    def add(self, entity: Expense) -> None:
+        self._session.add(entity)
+        self._session.commit()
+        self._session.refresh(entity)
+
+    def get(self, id: int) -> Expense | None:
+        return self._session.get(Expense, id)
+
+    def get_all(self) -> list[Expense]:
+        statement = select(Expense)
+        return list(self._session.exec(statement))
+
+    def update(self, id: int, entity: Expense) -> None:
+        if not self.get(id):
+            raise ExpenseNotFoundError(id)
+        entity.id = id
+        self._session.add(entity)
+        self._session.commit()
+        self._session.refresh(entity)
+
+    def delete(self, id: int) -> None:
+        expense = self.get(id)
+        if not expense:
+            raise ExpenseNotFoundError(id)
+        self._session.delete(expense)
+        self._session.commit()
+
+    def search_by_category(self, category: ExpenseCategory) -> list[Expense]:
+        statement = select(Expense).where(Expense.category == category)
+        return list(self._session.exec(statement))
+
+    def search_by_dates(self, start: datetime, end: datetime) -> list[Expense]:
+        """Search repository for expenses between a pair of dates."""
+        statement = select(Expense).where(Expense.date >= start, Expense.date <= end)
+        return list(self._session.exec(statement))
+
+    def list_by_user(self, telegram_user_id: int) -> list[Expense]:
+        """Search repository for expenses by a particular user."""
+        statement = select(Expense).where(Expense.telegram_user_id == telegram_user_id)
+        return list(self._session.exec(statement))
