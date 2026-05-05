@@ -17,23 +17,23 @@ class TestCurrencyEnum:
 
     def test_currency_is_string_enum(self):
         """Currency should be a StrEnum so values work as strings."""
-        assert Currency.EUR == "eur"
-        assert Currency.USD == "usd"
-        assert str(Currency.EUR) == "eur"
+        assert Currency.EUR == "EUR"
+        assert Currency.USD == "USD"
+        assert str(Currency.EUR) == "EUR"
 
     def test_currency_has_required_values(self):
         """Currency enum must include at least these 10 common currencies."""
         required_currencies = [
-            "eur",
-            "usd",
-            "gbp",
-            "jpy",
-            "chf",
-            "cad",
-            "aud",
-            "cny",
-            "inr",
-            "mxn",
+            "EUR",
+            "USD",
+            "GBP",
+            "JPY",
+            "CHF",
+            "CAD",
+            "AUD",
+            "CNY",
+            "INR",
+            "MXN",
         ]
         assert all(
             hasattr(Currency, c.upper()) and c in Currency for c in required_currencies
@@ -51,25 +51,25 @@ class TestExpenseCategoryEnum:
 
     def test_category_is_string_enum(self):
         """ExpenseCategory should be a StrEnum so values work as strings."""
-        assert ExpenseCategory.FOOD == "food"
-        assert ExpenseCategory.TRANSPORT == "transport"
-        assert str(ExpenseCategory.FOOD) == "food"
+        assert ExpenseCategory.FOOD == "Food"
+        assert ExpenseCategory.TRANSPORT == "Transport"
+        assert str(ExpenseCategory.FOOD) == "Food"
 
     @pytest.mark.parametrize(
         "category",
         [
-            "food",
-            "transport",
-            "entertainment",
-            "shopping",
-            "health",
-            "bills",
-            "education",
-            "travel",
-            "services",
-            "gifts",
-            "investments",
-            "other",
+            "Food",
+            "Transport",
+            "Entertainment",
+            "Shopping",
+            "Health",
+            "Bills",
+            "Education",
+            "Travel",
+            "Services",
+            "Gifts",
+            "Investments",
+            "Other",
         ],
     )
     def test_category_has_required_values(self, category):
@@ -148,7 +148,7 @@ class TestExpense:
 
         result = str(expense)
         assert "25" in result
-        assert "gbp" in result
+        assert "GBP" in result
 
     def test_expense_create_class_method(self):
         """Expense.create() should be a convenient factory method."""

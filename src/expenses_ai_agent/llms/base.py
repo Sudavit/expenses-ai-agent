@@ -10,7 +10,7 @@
 
 from collections.abc import Sequence
 from decimal import Decimal
-from enum import StrEnum, auto
+from enum import StrEnum
 from typing import Protocol
 
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
@@ -21,8 +21,8 @@ type Cost = dict[str, list[Decimal]]  # type alias for cost tracking
 
 
 class LLMProvider(StrEnum):
-    OPENAI = auto()
-    GROQ = auto()
+    OPENAI = "OPENAI"
+    GROQ = "GROQ"
 
 
 class Assistant(Protocol):
