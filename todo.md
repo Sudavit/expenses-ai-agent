@@ -62,10 +62,10 @@
     - [x] ruff format
     - [x] ruff check
     - [x] ty check
-- [ ] Pass pytest
+- [x] Pass pytest
 - [ ] Pass CI/CD
-- [ ] Tag 0.4.0-beta
 - [ ] Merge into week3 branch
+- [ ] Tag 0.4.0-beta
 - [ ] Delete all merged branches
 - [ ] Create a base PR
 - [ ] Fix PRs on code-review branch
