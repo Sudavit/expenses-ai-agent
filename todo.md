@@ -65,9 +65,9 @@
 - [x] Pass pytest
 - [x] Pass CI/CD
 - [x] Merge into week3 branch
-- [ ] Tag 0.4.0-beta
-- [ ] Delete all merged branches
-- [ ] Create a base PR
+- [x] Tag 0.4.0-beta
+- [x] Delete all merged branches
+- [x] Create a base PR
 - [ ] Fix PRs on code-review branch
 - [ ] merge to master
 - [ ] Tag 0.4.0
