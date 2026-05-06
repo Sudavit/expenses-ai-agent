@@ -226,7 +226,9 @@ class TestDBExpenseRepo:
                 category=ExpenseCategory.FOOD,
             )
             repo.add(expense)
-            assert expense.id is not None  # to keep ty from complaining that it could be
+            assert (
+                expense.id is not None
+            )  # to keep ty from complaining that it could be
 
             result = repo.get(expense.id)
             assert result is not None
@@ -245,7 +247,9 @@ class TestDBExpenseRepo:
             expense = Expense(amount=Decimal("15.00"), currency=Currency.EUR)
             repo.add(expense)
             expense_id = expense.id
-            assert expense_id is not None  # to keep ty from complaining that it could be
+            assert (
+                expense_id is not None
+            )  # to keep ty from complaining that it could be
 
             repo.delete(expense_id)
             assert repo.get(expense_id) is None
@@ -289,8 +293,12 @@ class TestDBExpenseRepo:
             last_week = now - timedelta(days=7)
 
             repo.add(Expense(amount=Decimal("10"), currency=Currency.EUR, date=now))
-            repo.add(Expense(amount=Decimal("20"), currency=Currency.EUR, date=yesterday))
-            repo.add(Expense(amount=Decimal("30"), currency=Currency.EUR, date=last_week))
+            repo.add(
+                Expense(amount=Decimal("20"), currency=Currency.EUR, date=yesterday)
+            )
+            repo.add(
+                Expense(amount=Decimal("30"), currency=Currency.EUR, date=last_week)
+            )
 
             start = now - timedelta(days=3)
             results = repo.search_by_dates(start, now)
@@ -300,13 +308,19 @@ class TestDBExpenseRepo:
     def test_db_expense_repo_list_by_user(self, db_session):
         with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
             repo.add(
-                Expense(amount=Decimal("10"), currency=Currency.EUR, telegram_user_id=100)
+                Expense(
+                    amount=Decimal("10"), currency=Currency.EUR, telegram_user_id=100
+                )
             )
             repo.add(
-                Expense(amount=Decimal("20"), currency=Currency.EUR, telegram_user_id=100)
+                Expense(
+                    amount=Decimal("20"), currency=Currency.EUR, telegram_user_id=100
+                )
             )
             repo.add(
-                Expense(amount=Decimal("30"), currency=Currency.EUR, telegram_user_id=200)
+                Expense(
+                    amount=Decimal("30"), currency=Currency.EUR, telegram_user_id=200
+                )
             )
 
             user_100_expenses = repo.list_by_user(telegram_user_id=100)
