@@ -224,6 +224,7 @@ class TestDBExpenseRepo:
             category=ExpenseCategory.FOOD,
         )
         repo.add(expense)
+        assert expense.id is not None  # to keep ty from complaining that it could be
 
         result = repo.get(expense.id)
         assert result is not None
@@ -244,6 +245,7 @@ class TestDBExpenseRepo:
         expense = Expense(amount=Decimal("15.00"), currency=Currency.EUR)
         repo.add(expense)
         expense_id = expense.id
+        assert expense_id is not None  # to keep ty from complaining that it could be
 
         repo.delete(expense_id)
         assert repo.get(expense_id) is None

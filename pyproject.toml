@@ -86,3 +86,4 @@ exclude_lines = [
 #main = "expenses_ai_agent.main:main"
 [project.scripts]
 expenses-ai-agent = "expenses_ai_agent.cli.cli:app"
+eaa = "expenses_ai_agent.cli.cli:app"

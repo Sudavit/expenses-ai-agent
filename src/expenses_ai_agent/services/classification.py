@@ -38,8 +38,11 @@ class ClassificationService:
         category_name: str,
         response: ExpenseCategorizationResponse,
     ) -> None:
-        # For human-in-the-loop: user corrects the classification
-        ...
+        response = response
+        response.category = category_name
+
+        if self.expense_repo:
+            self._persist_expense(expense_description, response)
 
     def _build_messages(self, expense_description: str) -> Messages:
         return [

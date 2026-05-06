@@ -58,5 +58,9 @@ def _display_result(result: ClassificationResult) -> None:
 
 def _build_service(db: bool) -> ClassificationService:
     assistant = OpenAIAssistant(model="gpt-4o-mini")
-    expense_repo = DBExpenseRepo(db_url=config("DATABASE_URL")) if db else None
+    expense_repo = (
+        DBExpenseRepo(db_url=config("DATABASE_URL", default="expenses.db"))
+        if db
+        else None
+    )
     return ClassificationService(assistant=assistant, expense_repo=expense_repo)

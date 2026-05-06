@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from sqlmodel import Session, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine, select
 
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Expense, ExpenseCategory
@@ -135,6 +135,7 @@ class DBExpenseRepo(ExpenseRepository[Expense]):
             self._owns_session = False  # External session, don't close it
         else:
             engine = create_engine(db_url)
+            SQLModel.metadata.create_all(engine)
             self._session = Session(engine)
             self._owns_session = True
 

@@ -226,3 +226,6 @@ __marimo__/
 
 # mutmut
 mutants
+
+# SQLModel
+*.db
