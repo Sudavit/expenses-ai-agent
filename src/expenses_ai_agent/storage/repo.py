@@ -139,6 +139,17 @@ class DBExpenseRepo(ExpenseRepository[Expense]):
             self._session = Session(engine)
             self._owns_session = True
 
+    def close(self) -> None:
+        """Close the database session if we own it."""
+        if self._owns_session and self._session:
+            self._session.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
     def add(self, entity: Expense) -> None:
         self._session.add(entity)
         self._session.commit()

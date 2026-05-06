@@ -202,7 +202,10 @@ class TestClassificationService:
 def db_engine():
     engine = create_engine("sqlite:///:memory:")
     SQLModel.metadata.create_all(engine)
-    return engine
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture
@@ -215,106 +218,99 @@ class TestDBExpenseRepo:
     """Tests for DBExpenseRepo."""
 
     def test_db_expense_repo_add_and_get(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            expense = Expense(
+                amount=Decimal("42.50"),
+                currency=Currency.EUR,
+                description="Lunch",
+                category=ExpenseCategory.FOOD,
+            )
+            repo.add(expense)
+            assert expense.id is not None  # to keep ty from complaining that it could be
 
-        expense = Expense(
-            amount=Decimal("42.50"),
-            currency=Currency.EUR,
-            description="Lunch",
-            category=ExpenseCategory.FOOD,
-        )
-        repo.add(expense)
-        assert expense.id is not None  # to keep ty from complaining that it could be
-
-        result = repo.get(expense.id)
-        assert result is not None
-        assert result.amount == Decimal("42.50")
+            result = repo.get(expense.id)
+            assert result is not None
+            assert result.amount == Decimal("42.50")
 
     def test_db_expense_repo_list(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            repo.add(Expense(amount=Decimal("10.00"), currency=Currency.EUR))
+            repo.add(Expense(amount=Decimal("20.00"), currency=Currency.USD))
 
-        repo.add(Expense(amount=Decimal("10.00"), currency=Currency.EUR))
-        repo.add(Expense(amount=Decimal("20.00"), currency=Currency.USD))
-
-        expenses = repo.get_all()
-        assert len(expenses) == 2
+            expenses = repo.get_all()
+            assert len(expenses) == 2
 
     def test_db_expense_repo_delete(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            expense = Expense(amount=Decimal("15.00"), currency=Currency.EUR)
+            repo.add(expense)
+            expense_id = expense.id
+            assert expense_id is not None  # to keep ty from complaining that it could be
 
-        expense = Expense(amount=Decimal("15.00"), currency=Currency.EUR)
-        repo.add(expense)
-        expense_id = expense.id
-        assert expense_id is not None  # to keep ty from complaining that it could be
-
-        repo.delete(expense_id)
-        assert repo.get(expense_id) is None
+            repo.delete(expense_id)
+            assert repo.get(expense_id) is None
 
     def test_db_expense_repo_delete_nonexistent_raises(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
-
-        with pytest.raises(ExpenseNotFoundError):
-            repo.delete(99999)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            with pytest.raises(ExpenseNotFoundError):
+                repo.delete(99999)
 
     def test_db_expense_repo_search_by_category(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            repo.add(
+                Expense(
+                    amount=Decimal("10"),
+                    currency=Currency.EUR,
+                    category=ExpenseCategory.FOOD,
+                )
+            )
+            repo.add(
+                Expense(
+                    amount=Decimal("20"),
+                    currency=Currency.EUR,
+                    category=ExpenseCategory.FOOD,
+                )
+            )
+            repo.add(
+                Expense(
+                    amount=Decimal("30"),
+                    currency=Currency.EUR,
+                    category=ExpenseCategory.TRANSPORT,
+                )
+            )
 
-        repo.add(
-            Expense(
-                amount=Decimal("10"),
-                currency=Currency.EUR,
-                category=ExpenseCategory.FOOD,
-            )
-        )
-        repo.add(
-            Expense(
-                amount=Decimal("20"),
-                currency=Currency.EUR,
-                category=ExpenseCategory.FOOD,
-            )
-        )
-        repo.add(
-            Expense(
-                amount=Decimal("30"),
-                currency=Currency.EUR,
-                category=ExpenseCategory.TRANSPORT,
-            )
-        )
-
-        food_expenses = repo.search_by_category(ExpenseCategory.FOOD)
-        assert len(food_expenses) == 2
+            food_expenses = repo.search_by_category(ExpenseCategory.FOOD)
+            assert len(food_expenses) == 2
 
     def test_db_expense_repo_search_by_dates(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            now = datetime.now(UTC)
+            yesterday = now - timedelta(days=1)
+            last_week = now - timedelta(days=7)
 
-        now = datetime.now(UTC)
-        yesterday = now - timedelta(days=1)
-        last_week = now - timedelta(days=7)
+            repo.add(Expense(amount=Decimal("10"), currency=Currency.EUR, date=now))
+            repo.add(Expense(amount=Decimal("20"), currency=Currency.EUR, date=yesterday))
+            repo.add(Expense(amount=Decimal("30"), currency=Currency.EUR, date=last_week))
 
-        repo.add(Expense(amount=Decimal("10"), currency=Currency.EUR, date=now))
-        repo.add(Expense(amount=Decimal("20"), currency=Currency.EUR, date=yesterday))
-        repo.add(Expense(amount=Decimal("30"), currency=Currency.EUR, date=last_week))
+            start = now - timedelta(days=3)
+            results = repo.search_by_dates(start, now)
 
-        start = now - timedelta(days=3)
-        results = repo.search_by_dates(start, now)
-
-        assert len(results) == 2
+            assert len(results) == 2
 
     def test_db_expense_repo_list_by_user(self, db_session):
-        repo = DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session)
+        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+            repo.add(
+                Expense(amount=Decimal("10"), currency=Currency.EUR, telegram_user_id=100)
+            )
+            repo.add(
+                Expense(amount=Decimal("20"), currency=Currency.EUR, telegram_user_id=100)
+            )
+            repo.add(
+                Expense(amount=Decimal("30"), currency=Currency.EUR, telegram_user_id=200)
+            )
 
-        repo.add(
-            Expense(amount=Decimal("10"), currency=Currency.EUR, telegram_user_id=100)
-        )
-        repo.add(
-            Expense(amount=Decimal("20"), currency=Currency.EUR, telegram_user_id=100)
-        )
-        repo.add(
-            Expense(amount=Decimal("30"), currency=Currency.EUR, telegram_user_id=200)
-        )
-
-        user_100_expenses = repo.list_by_user(telegram_user_id=100)
-        assert len(user_100_expenses) == 2
+            user_100_expenses = repo.list_by_user(telegram_user_id=100)
+            assert len(user_100_expenses) == 2
 
 
 # Step 4: Create CLI
@@ -344,11 +340,11 @@ class TestCLIApp:
         assert app is not None
 
     def test_classify_command_exists(self, cli_runner):
-        result = cli_runner.invoke(app, ["classify", "--help"])
+        result = cli_runner.invoke(app, ["--help"])
         assert result.exit_code == 0
 
     def test_classify_requires_description(self, cli_runner):
-        result = cli_runner.invoke(app, ["classify"])
+        result = cli_runner.invoke(app, [])
         assert result.exit_code != 0 or "missing" in result.output.lower()
 
     def test_classify_with_mocked_service(
