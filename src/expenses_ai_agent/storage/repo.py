@@ -19,7 +19,7 @@ class ExpenseRepository[T](ABC):
         ...
 
     @abstractmethod
-    def get_all(self) -> list[T] | None:
+    def get_all(self) -> list[T]:
         """Get all entities from the repository."""
         ...
 
