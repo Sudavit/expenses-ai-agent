@@ -30,12 +30,21 @@ console = Console()
 @app.command()
 def classify(
     description: str = typer.Argument(..., help="Expense description"),
-    db: bool = typer.Option(False, "--db", help="Persist to database"),
+    db_name: str | None = typer.Option(
+        None,
+        "--db",
+        help=(
+            "Persist to named database (path or URL)."
+            "Use '--db default' to use $DATABASE_URL."
+        ),
+    ),
 ):
     """Classify an expense using AI."""
+    persist = db_name is not None
+
     try:
-        service = _build_service(db=db)
-        result = service.classify(description, persist=db)
+        service = _build_service(db_name=db_name)
+        result = service.classify(description, persist=persist)
         _display_result(result)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
@@ -56,11 +65,9 @@ def _display_result(result: ClassificationResult) -> None:
     console.print(table)
 
 
-def _build_service(db: bool) -> ClassificationService:
+def _build_service(db_name: str | None) -> ClassificationService:
     assistant = OpenAIAssistant(model="gpt-4o-mini")
-    expense_repo = (
-        DBExpenseRepo(db_url=config("DATABASE_URL", default="expenses.db"))
-        if db
-        else None
-    )
+    if db_name == "default":
+        db_name = config("DATABASE_URL")
+    expense_repo = DBExpenseRepo(db_url=db_name) if db_name else None
     return ClassificationService(assistant=assistant, expense_repo=expense_repo)
