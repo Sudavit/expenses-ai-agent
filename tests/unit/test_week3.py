@@ -71,7 +71,8 @@ class TestUserPrompt:
         """USER_PROMPT should be formattable."""
         try:
             formatted = USER_PROMPT.format(expense_description="Coffee $5.50")
-            assert "Coffee" in formatted or "5.50" in formatted
+            assert "Coffee" in formatted
+            assert "5.50" in formatted
         except KeyError as e:
             assert "expense" in str(e).lower()
 
@@ -390,7 +391,8 @@ class TestCLIApp:
 
             with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
                 result = cli_runner.invoke(app, ["Coffee at Starbucks $5.50"])
-                assert result.exit_code == 0 or "Food" in result.output
+                assert result.exit_code == 0
+                assert "Food" in result.output
 
     def test_classify_db_option_exists(self, cli_runner):
         result = cli_runner.invoke(app, ["classify", "--help"])
@@ -410,4 +412,6 @@ class TestCLIApp:
             with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
                 result = cli_runner.invoke(app, ["Test expense"])
                 output = result.output
-                assert "Food" in output or "5.50" in output or "Category" in output
+                assert "Food" in output
+                assert "5.50" in output
+                assert "Category" in output
