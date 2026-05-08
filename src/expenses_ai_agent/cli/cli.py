@@ -18,7 +18,7 @@ from expenses_ai_agent.services.classification import (
     ClassificationResult,
     ClassificationService,
 )
-from expenses_ai_agent.storage.repo import DBExpenseRepo
+from expenses_ai_agent.storage.repo import DBExpenseRepository
 
 app = typer.Typer(
     name="expenses-ai-agent",
@@ -69,5 +69,5 @@ def _build_service(db_name: str | None) -> ClassificationService:
     assistant = OpenAIAssistant(model="gpt-4o-mini")
     if db_name == "default":
         db_name = config("DATABASE_URL")
-    expense_repo = DBExpenseRepo(db_url=db_name) if db_name else None
+    expense_repo = DBExpenseRepository(db_url=db_name) if db_name else None
     return ClassificationService(assistant=assistant, expense_repo=expense_repo)

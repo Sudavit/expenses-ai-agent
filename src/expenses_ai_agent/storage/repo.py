@@ -127,7 +127,16 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         return result
 
 
-class DBExpenseRepo(ExpenseRepository[Expense]):
+class DBExpenseRepository(ExpenseRepository[Expense]):
+    """
+    Persistent SQLModel-backed implementation of `ExpenseRepository`.
+
+    Owns its session by default (constructor creates engine + session and
+    schema), or accepts an externally managed session for testing/transactional
+    contexts. Can be used as a context manager to guarantee cleanup of
+    owned sessions.
+    """
+
     def __init__(self, db_url: str, session: Session | None = None):
         self._db_url = db_url
         if session:

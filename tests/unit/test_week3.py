@@ -17,7 +17,7 @@ from expenses_ai_agent.services.classification import (
 )
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
-from expenses_ai_agent.storage.repo import DBExpenseRepo, ExpenseRepository
+from expenses_ai_agent.storage.repo import DBExpenseRepository, ExpenseRepository
 
 # Step 1: Create Prompts
 
@@ -214,11 +214,13 @@ def db_session(db_engine):
         yield session
 
 
-class TestDBExpenseRepo:
-    """Tests for DBExpenseRepo."""
+class TestDBExpenseRepository:
+    """Tests for DBExpenseRepository."""
 
     def test_db_expense_repo_add_and_get(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             expense = Expense(
                 amount=Decimal("42.50"),
                 currency=Currency.EUR,
@@ -235,7 +237,9 @@ class TestDBExpenseRepo:
             assert result.amount == Decimal("42.50")
 
     def test_db_expense_repo_list(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             repo.add(Expense(amount=Decimal("10.00"), currency=Currency.EUR))
             repo.add(Expense(amount=Decimal("20.00"), currency=Currency.USD))
 
@@ -243,7 +247,9 @@ class TestDBExpenseRepo:
             assert len(expenses) == 2
 
     def test_db_expense_repo_delete(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             expense = Expense(amount=Decimal("15.00"), currency=Currency.EUR)
             repo.add(expense)
             expense_id = expense.id
@@ -255,12 +261,16 @@ class TestDBExpenseRepo:
             assert repo.get(expense_id) is None
 
     def test_db_expense_repo_delete_nonexistent_raises(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             with pytest.raises(ExpenseNotFoundError):
                 repo.delete(99999)
 
     def test_db_expense_repo_search_by_category(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             repo.add(
                 Expense(
                     amount=Decimal("10"),
@@ -287,7 +297,9 @@ class TestDBExpenseRepo:
             assert len(food_expenses) == 2
 
     def test_db_expense_repo_search_by_dates(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             now = datetime.now(UTC)
             yesterday = now - timedelta(days=1)
             last_week = now - timedelta(days=7)
@@ -306,7 +318,9 @@ class TestDBExpenseRepo:
             assert len(results) == 2
 
     def test_db_expense_repo_list_by_user(self, db_session):
-        with DBExpenseRepo(db_url="sqlite:///:memory:", session=db_session) as repo:
+        with DBExpenseRepository(
+            db_url="sqlite:///:memory:", session=db_session
+        ) as repo:
             repo.add(
                 Expense(
                     amount=Decimal("10"), currency=Currency.EUR, telegram_user_id=100
