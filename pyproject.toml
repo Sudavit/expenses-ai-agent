@@ -81,9 +81,6 @@ exclude_lines = [
    paths = ["src"]
    test_runner = "pytest"
 
-#[project.scripts]
-# this is main() in src/expenses_ai_agent/main.py
-#main = "expenses_ai_agent.main:main"
 [project.scripts]
 expenses-ai-agent = "expenses_ai_agent.cli.cli:app"
 eaa = "expenses_ai_agent.cli.cli:app"
