@@ -11,6 +11,8 @@ from expenses_ai_agent.storage.repo import (
     InMemoryExpenseRepository,
 )
 
+BAD_ID = 999
+
 
 class TestCurrencyEnum:
     """Tests for the Currency enumeration."""
@@ -228,7 +230,7 @@ class TestInMemoryExpenseRepository:
 
     def test_get_nonexistent_returns_none(self, repo):
         """Getting a non-existent expense should return None."""
-        result = repo.get(999)
+        result = repo.get(BAD_ID)
         assert result is None
 
     def test_list_all_expenses(self, repo):
@@ -257,7 +259,7 @@ class TestInMemoryExpenseRepository:
     def test_delete_nonexistent_raises(self, repo):
         """Deleting a non-existent expense should raise ExpenseNotFoundError."""
         with pytest.raises(ExpenseNotFoundError):
-            repo.delete(999)
+            repo.delete(BAD_ID)
 
     def test_search_by_category(self, repo):
         """Should be able to search expenses by category."""

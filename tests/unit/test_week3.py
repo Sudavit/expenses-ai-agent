@@ -19,6 +19,8 @@ from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
 from expenses_ai_agent.storage.repo import DBExpenseRepository, ExpenseRepository
 
+BAD_ID = 999
+
 # Step 1: Create Prompts
 
 
@@ -266,7 +268,7 @@ class TestDBExpenseRepository:
             db_url="sqlite:///:memory:", session=db_session
         ) as repo:
             with pytest.raises(ExpenseNotFoundError):
-                repo.delete(99999)
+                repo.delete(999)
 
     def test_db_expense_repo_search_by_category(self, db_session):
         with DBExpenseRepository(
