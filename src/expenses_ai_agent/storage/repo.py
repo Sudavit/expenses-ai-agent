@@ -172,12 +172,15 @@ class DBExpenseRepository(ExpenseRepository[Expense]):
         return list(self._session.exec(statement))
 
     def update(self, id: int, entity: Expense) -> None:
-        if not self.get(id):
+        existing = self._session.get(Expense, id)
+        if existing is None:
             raise ExpenseNotFoundError(id)
-        entity.id = id
-        self._session.add(entity)
+        update_data = entity.model_dump(exclude={"id"}, exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(existing, key, value)
+        self._session.add(existing)
         self._session.commit()
-        self._session.refresh(entity)
+        self._session.refresh(existing)
 
     def delete(self, id: int) -> None:
         expense = self.get(id)
