@@ -34,8 +34,8 @@ def classify(
         None,
         "--db",
         help=(
-            "Persist to named database (path or URL)."
-            "Use '--db default' to use $DATABASE_URL."
+            "Persist to named database (path or URL, e.g., '--db sqlite:///my_purchases.db')."
+            " Use '--db default' use sqlite:///expenses.db [or $DATABASE_URL if set]."
         ),
     ),
 ):
@@ -68,6 +68,7 @@ def _display_result(result: ClassificationResult) -> None:
 def _build_service(db_name: str | None) -> ClassificationService:
     assistant = OpenAIAssistant(model="gpt-4o-mini")
     if db_name == "default":
-        db_name = config("DATABASE_URL")
+        db_name = config("DATABASE_URL", default="sqlite:///expenses.db")
+
     expense_repo = DBExpenseRepository(db_url=db_name) if db_name else None
     return ClassificationService(assistant=assistant, expense_repo=expense_repo)
