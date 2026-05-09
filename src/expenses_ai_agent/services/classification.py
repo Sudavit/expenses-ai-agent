@@ -35,7 +35,7 @@ class ClassificationService:
     def persist_with_category(
         self,
         expense_description: str,
-        category_name: str,
+        category_name: ExpenseCategory,
         response: ExpenseCategorizationResponse,
     ) -> None:
         response = response

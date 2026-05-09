@@ -86,7 +86,7 @@ class TestClassificationResult:
     def test_classification_result_has_response(self):
         """ClassificationResult should contain the LLM response."""
         response = ExpenseCategorizationResponse(
-            category="Food",
+            category=ExpenseCategory.FOOD,
             total_amount=Decimal("10.00"),
             currency=Currency.EUR,
             confidence=0.9,
@@ -101,7 +101,7 @@ class TestClassificationResult:
     def test_classification_result_tracks_persistence(self):
         """ClassificationResult should track persistence status."""
         response = ExpenseCategorizationResponse(
-            category="Transport",
+            category=ExpenseCategory.TRANSPORT,
             total_amount=Decimal("25.00"),
             currency=Currency.USD,
             confidence=0.85,
@@ -122,7 +122,7 @@ class TestClassificationService:
     def mock_assistant(self):
         assistant = create_autospec(Assistant)
         assistant.completion.return_value = ExpenseCategorizationResponse(
-            category="Food",
+            category=ExpenseCategory.FOOD,
             total_amount=Decimal("5.50"),
             currency=Currency.USD,
             confidence=0.95,
@@ -169,7 +169,7 @@ class TestClassificationService:
         )
 
         response = ExpenseCategorizationResponse(
-            category="Food",
+            category=ExpenseCategory.FOOD,
             total_amount=Decimal("10.00"),
             currency=Currency.EUR,
             confidence=0.6,
@@ -178,7 +178,7 @@ class TestClassificationService:
 
         service.persist_with_category(
             expense_description="Movie snacks",
-            category_name="Entertainment",
+            category_name=ExpenseCategory.ENTERTAINMENT,
             response=response,
         )
 
@@ -353,7 +353,7 @@ def cli_runner():
 @pytest.fixture
 def mock_classification_response():
     return ExpenseCategorizationResponse(
-        category="Food",
+        category=ExpenseCategory.FOOD,
         total_amount=Decimal("5.50"),
         currency=Currency.USD,
         confidence=0.95,
