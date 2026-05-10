@@ -30,6 +30,9 @@ console = Console()
 @app.command()
 def classify(
     description: str = typer.Argument(..., help="Expense description"),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="provide exception traceback."
+    ),
     db_name: str | None = typer.Option(
         None,
         "--db",
@@ -48,6 +51,8 @@ def classify(
         _display_result(result)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
+        if verbose:
+            console.print_exception()
         raise typer.Exit(code=1)
 
 
