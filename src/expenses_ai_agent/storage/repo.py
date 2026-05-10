@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from types import TracebackType
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
@@ -156,7 +157,12 @@ class DBExpenseRepository(ExpenseRepository[Expense]):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.close()
 
     def add(self, entity: Expense) -> None:
