@@ -69,17 +69,21 @@ class TestCurrencyExceptions:
                 to_currency="CTM",
             )
 
+
+class TestCalculateCost:
     def test_calculate_cost_correctly(self):
         """
         Call the function, get a correct return.
-        TODO: I need to use a mock here.
-        The function is a method in OpenAIAssistant, which hardwires this model,
-        and I don't want to be calling OpenAI for a stupid test.
         """
 
-        assert OpenAIAssistant.calculate_cost(prompt_tokens=1, completion_tokens=2) == (
-            PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["input"]
-            + 2 * PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["output"]
+        # TODO: replace this with a mock?
+        assistant = OpenAIAssistant()
+        assert assistant.calculate_cost(prompt_tokens=1, completion_tokens=2) == (
+            (
+                PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["input"]
+                + 2 * PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["output"]
+            )
+            / Decimal(1_000_000)
         )
 
 
