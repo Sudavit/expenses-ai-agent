@@ -180,11 +180,13 @@ class TestClassificationService:
 
         service.persist_with_category(
             expense_description="Movie snacks",
-            category_name=ExpenseCategory.ENTERTAINMENT,
+            category=ExpenseCategory.ENTERTAINMENT,
             response=response,
         )
 
         mock_expense_repo.add.assert_called_once()
+        response_passed = mock_expense_repo.add.call_args.args[0]
+        assert response_passed.category == ExpenseCategory.ENTERTAINMENT
 
     def test_service_builds_correct_messages(self, mock_assistant):
         service = ClassificationService(assistant=mock_assistant)

@@ -35,11 +35,10 @@ class ClassificationService:
     def persist_with_category(
         self,
         expense_description: str,
-        category_name: ExpenseCategory,
+        category: ExpenseCategory,
         response: ExpenseCategorizationResponse,
     ) -> None:
-        response = response
-        response.category = category_name
+        response = response.model_copy(update={"category": category})
 
         if self.expense_repo:
             self._persist_expense(expense_description, response)
