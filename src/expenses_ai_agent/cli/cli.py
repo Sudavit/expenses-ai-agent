@@ -13,6 +13,7 @@ from decouple import config
 from rich.console import Console
 from rich.table import Table
 
+from expenses_ai_agent.llms.exceptions import LLMNoKeyError
 from expenses_ai_agent.llms.openai import OpenAIAssistant
 from expenses_ai_agent.services.classification import (
     ClassificationResult,
@@ -46,7 +47,17 @@ def classify(
     persist = db_name is not None
 
     try:
-        service = _build_service(db_name=db_name)
+        assistant = OpenAIAssistant(model="gpt-4o-mini")
+    except LLMNoKeyError as e:
+        console.print(f"[green]No LLM Key Supplied: {e}[/green]")
+        # TODO: instead of immediately exiting,
+        #   this path can permit other LLM-free usage
+        if verbose:
+            console.print_exception()
+        raise typer.Exit(code=0)
+
+    try:
+        service = _build_service(assistant=assistant, db_name=db_name)
         result = service.classify(description, persist=persist)
         _display_result(result)
     except Exception as e:
@@ -70,8 +81,9 @@ def _display_result(result: ClassificationResult) -> None:
     console.print(table)
 
 
-def _build_service(db_name: str | None) -> ClassificationService:
-    assistant = OpenAIAssistant(model="gpt-4o-mini")
+def _build_service(
+    assistant: OpenAIAssistant, db_name: str | None
+) -> ClassificationService:
     if db_name == "default":
         db_name = config("DATABASE_URL", default="sqlite:///expenses.db")
 

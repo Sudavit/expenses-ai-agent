@@ -59,6 +59,16 @@ class TestCLIAppExtras:
             re.search(pattern, line.lower()) for line in result.output.splitlines()
         )
 
+    def test_app_behavior_without_api_key(self, cli_runner, monkeypatch):
+        # Unset the variable for this test only
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+        result = cli_runner.invoke(app, ["Coffee"])
+        # exits okay
+        assert result.exit_code == 0
+        pattern = r"no llm key supplied"
+        assert pattern in result.output.lower()
+
 
 class TestDBExpenseRepositoryExtras:
     """

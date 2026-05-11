@@ -13,11 +13,11 @@ from collections.abc import Sequence
 from decimal import Decimal
 from typing import Any, cast
 
-from decouple import UndefinedValueError, config
+from decouple import config
 from openai import OpenAI
 
 from expenses_ai_agent.llms.base import Messages
-from expenses_ai_agent.llms.exceptions import LLMParseError
+from expenses_ai_agent.llms.exceptions import LLMNoKeyError, LLMParseError
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 
 PRICE_PER_MILLION_TOKENS = {
@@ -51,7 +51,7 @@ class OpenAIAssistant:
         else:
             self.api_key = api_key
         if not self.api_key:
-            raise UndefinedValueError("OPENAI_API_KEY must be set")
+            raise LLMNoKeyError("set $OPENAI_API_KEY or pass in to OpenAIAssistant()")
         self.model = model
         self.client = OpenAI(api_key=self.api_key)
 
