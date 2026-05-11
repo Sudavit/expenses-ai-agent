@@ -68,6 +68,16 @@
 - [x] Tag 0.4.0-beta
 - [x] Delete all merged branches
 - [x] Create a base PR
-- [ ] Fix PRs on code-review branch
-- [ ] merge to master
+- [x] Fix PRs on code-review branch
+- [x] merge to master
+- [x] Update todo
+## Week 4: Mobile first
 - [ ] Tag 0.4.0
+- [ ] Remove merged branches
+- [ ] Create week4 branch
+- [ ] Pull week4 drip
+- [ ] Read week4.pdf
+- [ ] Add tests_week4
+- [ ] Install dependencies
+- [ ] Handle other prereqs.
+- [ ] Create package structure
