@@ -17,7 +17,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
-from expenses_ai_agent.storage.models import Currency
+from expenses_ai_agent.storage.models import Currency, ExpenseCategory
 
 
 def _utc_now() -> datetime:
@@ -25,7 +25,9 @@ def _utc_now() -> datetime:
 
 
 class ExpenseCategorizationResponse(BaseModel):
-    category: str
+    category: ExpenseCategory = Field(
+        description="Category of the expense ('Food', 'Travel', ...)"
+    )
     total_amount: Decimal = Field(
         description="Numeric amount extracted from the expense description"
     )

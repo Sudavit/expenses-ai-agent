@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from expenses_ai_agent.llms.base import Assistant, Cost, LLMProvider, Messages
 from expenses_ai_agent.llms.openai import OpenAIAssistant
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
-from expenses_ai_agent.storage.models import Currency
+from expenses_ai_agent.storage.models import Currency, ExpenseCategory
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
     DATETIME_FORMATTER_TOOL,
@@ -25,7 +25,7 @@ class TestExpenseCategorizationResponse:
     def test_response_has_required_fields(self):
         """Response model must have all required fields."""
         response = ExpenseCategorizationResponse(
-            category="Food",
+            category=ExpenseCategory.FOOD,
             total_amount=Decimal("42.50"),
             currency=Currency.EUR,
             confidence=0.95,
@@ -41,7 +41,7 @@ class TestExpenseCategorizationResponse:
     def test_response_optional_fields(self):
         """Response should support optional comments."""
         response = ExpenseCategorizationResponse(
-            category="Transport",
+            category=ExpenseCategory.TRANSPORT,
             total_amount=Decimal("15.00"),
             currency=Currency.USD,
             confidence=0.8,
@@ -54,7 +54,7 @@ class TestExpenseCategorizationResponse:
     def test_response_has_timestamp(self):
         """Response should include a timestamp."""
         response = ExpenseCategorizationResponse(
-            category="Entertainment",
+            category=ExpenseCategory.ENTERTAINMENT,
             total_amount=Decimal("10.00"),
             currency=Currency.EUR,
             confidence=0.9,
@@ -71,7 +71,7 @@ class TestExpenseCategorizationResponse:
     def test_response_json_serialization(self):
         """Response should serialize to JSON."""
         response = ExpenseCategorizationResponse(
-            category="Food",
+            category=ExpenseCategory.FOOD,
             total_amount=Decimal("25.00"),
             currency=Currency.GBP,
             confidence=0.85,
@@ -300,7 +300,7 @@ class TestOpenAIAssistant:
             mock_openai_cls.return_value = mock_client
 
             mock_parsed = ExpenseCategorizationResponse(
-                category="Food",
+                category=ExpenseCategory.FOOD,
                 total_amount=Decimal("5.50"),
                 currency=Currency.USD,
                 confidence=0.95,

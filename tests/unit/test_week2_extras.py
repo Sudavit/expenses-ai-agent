@@ -5,6 +5,7 @@ from decouple import UndefinedValueError, config
 from jsonschema import validate
 
 from expenses_ai_agent.llms.exceptions import LLMParseError
+from expenses_ai_agent.llms.openai import PRICE_PER_MILLION_TOKENS, OpenAIAssistant
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
     DATETIME_FORMATTER_TOOL,
@@ -67,6 +68,27 @@ class TestCurrencyExceptions:
                 from_currency="CAD",
                 to_currency="CTM",
             )
+
+
+class TestCalculateCost:
+    def test_calculate_cost_correctly(self):
+        """
+        Call the function, get a correct return.
+        """
+
+        # TODO: replace this with a mock?
+        assistant = OpenAIAssistant()
+        assert assistant.calculate_cost(prompt_tokens=1, completion_tokens=2) == (
+            (
+                PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["input"]
+                + 2 * PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["output"]
+            )
+            / Decimal(1_000_000)
+        )
+
+
+class TestAssistantProtocol:
+    """Additional test for calculating cost"""
 
 
 class TestLLMExceptions:

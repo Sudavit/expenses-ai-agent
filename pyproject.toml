@@ -1,6 +1,6 @@
 [project]
 name = "expenses_ai_agent"
-version = "0.3.0"
+version = "0.4.0-beta"
 description = "AI Agent to track expenses"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -10,7 +10,9 @@ dependencies = [
     "pydantic>=2.13.3",
     "python-decouple>=3.8",
     "requests>=2.33.1",
+    "rich>=15.0.0",
     "sqlmodel>=0.0.38",
+    "typer>=0.25.1",
 ]
 
 [dependency-groups]
@@ -80,5 +82,5 @@ exclude_lines = [
    test_runner = "pytest"
 
 [project.scripts]
-# this is main() in src/expenses_ai_agent/main.py
-main = "expenses_ai_agent.main:main"
+expenses-ai-agent = "expenses_ai_agent.cli.cli:app"
+eaa = "expenses_ai_agent.cli.cli:app"

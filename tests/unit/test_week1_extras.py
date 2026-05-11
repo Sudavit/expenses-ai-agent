@@ -8,6 +8,8 @@ from expenses_ai_agent.storage.repo import (
     InMemoryExpenseRepository,
 )
 
+BAD_ID = 999
+
 
 class TestInMemoryExpenseRepositoryExtras:
     """
@@ -55,7 +57,7 @@ class TestInMemoryExpenseRepositoryExtras:
     def test_update_nonexistent_raises(self, repo, sample_expense_2):
         """Updating a non-existent expense should raise ExpenseNotFoundError."""
         with pytest.raises(ExpenseNotFoundError):
-            repo.update(999, sample_expense_2)
+            repo.update(BAD_ID, sample_expense_2)
 
     def test_get_nonexistent_returns_none(self, repo):
-        assert repo.get(999) is None
+        assert repo.get(BAD_ID) is None

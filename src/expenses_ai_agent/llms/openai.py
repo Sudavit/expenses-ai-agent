@@ -13,14 +13,19 @@ from collections.abc import Sequence
 from decimal import Decimal
 from typing import Any, cast
 
-from decouple import UndefinedValueError, config
+from decouple import config
 from openai import OpenAI
 
 from expenses_ai_agent.llms.base import Messages
-from expenses_ai_agent.llms.exceptions import LLMParseError
+from expenses_ai_agent.llms.exceptions import LLMNoKeyError, LLMParseError
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 
 PRICE_PER_MILLION_TOKENS = {
+    "gpt-4o-mini": {
+        "input": Decimal("0.15"),
+        "cached_input": Decimal("0.075"),
+        "output": Decimal("0.60"),
+    },
     "gpt-5.5": {
         "input": Decimal("5.00"),
         "cached_input": Decimal("0.50"),
@@ -46,11 +51,11 @@ class OpenAIAssistant:
         else:
             self.api_key = api_key
         if not self.api_key:
-            raise UndefinedValueError("OPENAI_API_KEY must be set")
+            raise LLMNoKeyError("set $OPENAI_API_KEY or pass in to OpenAIAssistant()")
         self.model = model
         self.client = OpenAI(api_key=self.api_key)
 
-    def completion(self, messages: Messages) -> ExpenseCategorizationResponse | None:
+    def completion(self, messages: Messages) -> ExpenseCategorizationResponse:
         response = self.client.beta.chat.completions.parse(
             model=self.model,
             messages=cast(Any, messages),
@@ -68,8 +73,16 @@ class OpenAIAssistant:
         return result
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int) -> Decimal:
-        # OpenAI pricing page is here: https://openai.com/api/pricing/
-        return Decimal("0.00")
+        """
+        OpenAI pricing page is here: https://openai.com/api/pricing/.
+        Didn't list gpt-4o-mini, so I asked Gemini. :-)
+        TODO: understand how to use price["cached_input"] in the calculation below
+        """
+        price = PRICE_PER_MILLION_TOKENS[self.model]
+        cost = (
+            prompt_tokens * price["input"] + completion_tokens * price["output"]
+        ) / 1_000_000
+        return Decimal(cost)
 
     def get_available_models(self) -> Sequence[str]:
         models = [model.id for model in self.client.models.list()]

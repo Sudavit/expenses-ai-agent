@@ -45,4 +45,29 @@
 - [x] merge to master
 - [x] delete old branches
 ## Week 3: Classification Service and CLI
-- [ ] Tag 0.3.0
+- [x] Tag 0.3.0
+- [x] Make NotebookLM for week 3
+- [x] Read Typer, Rich Quickstarts
+- [x] Read week3 pdf
+- [x] Add tests_week3
+- [x] Install dependencies
+- [x] Create Package Structure
+- [x] Create User and System Prompts
+- [x] Implement Classification Services
+- [x] Add New Repo Abstract Functions
+- [x] Implement SQLModel Database Repository
+- [x] Create CLI
+- [x] Hand-test CLI
+- [x] Pass linting
+    - [x] ruff format
+    - [x] ruff check
+    - [x] ty check
+- [x] Pass pytest
+- [x] Pass CI/CD
+- [x] Merge into week3 branch
+- [x] Tag 0.4.0-beta
+- [x] Delete all merged branches
+- [x] Create a base PR
+- [ ] Fix PRs on code-review branch
+- [ ] merge to master
+- [ ] Tag 0.4.0
