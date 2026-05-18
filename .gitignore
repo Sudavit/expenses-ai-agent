@@ -229,3 +229,6 @@ mutants
 
 # SQLModel
 *.db
+
+# temporary storage
+tmp/
