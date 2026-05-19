@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import SQLModel
 
-engine = create_engine("sqlite:///expenses.db")
+from expenses_ai_agent.api.deps import engine
 
 
 @asynccontextmanager
