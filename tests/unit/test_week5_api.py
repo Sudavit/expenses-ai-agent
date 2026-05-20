@@ -2,7 +2,6 @@ from decimal import Decimal
 from unittest.mock import create_autospec, patch
 
 import pytest
-from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
 from fastapi.testclient import TestClient
 
 from expenses_ai_agent.api.deps import get_expense_repo, get_user_id
@@ -20,6 +19,8 @@ from expenses_ai_agent.services.classification import (
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
 from expenses_ai_agent.storage.repo import ExpenseRepository
+from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
+from expenses_ai_agent.streamlit.views import add_expense, dashboard, expenses
 
 
 class TestFastAPIApp:
@@ -245,3 +246,19 @@ class TestStreamlitAPIClient:
         """Client should have method to get analytics summary."""
         client = ExpenseAPIClient(base_url="http://test")
         assert hasattr(client, "get_summary") or hasattr(client, "get_analytics")
+
+
+class TestStreamlitViews:
+    """Tests for Streamlit view modules."""
+
+    def test_dashboard_view_exists(self):
+        """Dashboard view module should exist."""
+        assert dashboard is not None
+
+    def test_expenses_view_exists(self):
+        """Expenses list view module should exist."""
+        assert expenses is not None
+
+    def test_add_expense_view_exists(self):
+        """Add expense view module should exist."""
+        assert add_expense is not None
