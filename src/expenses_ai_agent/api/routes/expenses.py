@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from decouple import config
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from expenses_ai_agent.api.deps import get_expense_repo, get_user_id
 from expenses_ai_agent.api.schemas.expense import (
@@ -8,6 +9,7 @@ from expenses_ai_agent.api.schemas.expense import (
     ExpenseResponse,
 )
 from expenses_ai_agent.llms.openai import OpenAIAssistant
+from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 from expenses_ai_agent.services.classification import ClassificationService
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.repo import ExpenseRepository
@@ -21,7 +23,7 @@ def list_expenses(
     page_size: int = 20,
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
-) -> None:
+) -> ExpenseListResponse:
     expenses = expense_repo.list_by_user(user_id)
     start = (page - 1) * page_size
     end = start + page_size
@@ -41,21 +43,21 @@ def get_one_expense(
 ) -> ExpenseResponse:
     try:
         expense = expense_repo.get(expense_id)
-    except ExpenseNotFoundError("HTTP 404"):
-        raise ExpenseNotFoundError("HTTP 404")  # TODO: This can't be right
+    except ExpenseNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Expense with id {expense_id} not found",
+        )
+    return ExpenseResponse.model_validate(expense)
 
-    return expense
 
-
-@router.delete("/{expense_id}")
+@router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_one_expense(
     expense_id: int,
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
-) -> int:
+) -> None:
     expense_repo.delete(expense_id)
-    return 204
-    # TODO: return 204, somehow
 
 
 @router.post("/classify", response_model=ExpenseClassifyResponse)
@@ -63,8 +65,11 @@ def classify(
     request: ExpenseClassifyRequest,
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
-) -> ExpenseClassifyResponse:
-    assistant = OpenAIAssistant(...)  # TODO: fill in args
+) -> ExpenseCategorizationResponse:
+    model = "gpt-4.1-nano-2025-04-14"
+    api_key = config("OPENAI_API_KEY", default="")
+
+    assistant = OpenAIAssistant(model=model, api_key=api_key)
     result = ClassificationService(
         assistant=assistant, expense_repo=expense_repo
     ).classify(request.description)

@@ -44,8 +44,8 @@ class ExpenseResponse(BaseModel):
     amount: Decimal
     currency: Currency
     date: datetime
-    description: str | None  # TODO: Not in "Response Schemas"
-    telegram_user_id: int | None  # TODO: Not in "Response Schemas"
+    description: str | None
+    telegram_user_id: int | None
 
     model_config = ConfigDict(from_attributes=True)
 
