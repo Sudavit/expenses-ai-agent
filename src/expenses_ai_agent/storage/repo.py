@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from types import TracebackType
@@ -8,11 +9,9 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Expense, ExpenseCategory
 
-DUMMY_MONTHLY_TOTALS = {f"2025-{i}": Decimal(i) for i in range(1, 12)}
+DUMMY_CATEGORY_TOTALS = {str(category): Decimal("69.0") for category in ExpenseCategory}
 
-DUMMY_CATEGORY_TOTALS = {
-    str(category): Decimal(69.0) for category in ExpenseCategory
-}  # the "str()" is for ty :-(
+DUMMY_MONTHLY_TOTALS = {f"2025-{i}": Decimal(i) for i in range(1, 12)}
 
 
 class ExpenseRepository[T](ABC):
@@ -146,11 +145,23 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
 
     def get_monthly_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
         """Get monthly totals by user"""
-        return DUMMY_MONTHLY_TOTALS
+        expenses = self.get_all()
+        monthly_totals = defaultdict(Decimal)
+        for expense in expenses:
+            if expense.telegram_user_id == telegram_user_id:
+                datestr = expense.date.strftime("%Y-%m")
+                monthly_totals[datestr] += expense.amount
+        return monthly_totals
 
     def get_category_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
         """Monthly Totals by category"""
-        return DUMMY_CATEGORY_TOTALS
+        expenses = self.get_all()
+        category_totals = defaultdict(Decimal)
+        for expense in expenses:
+            if expense.telegram_user_id == telegram_user_id:
+                category = expense.category
+                category_totals[category] += expense.amount
+        return category_totals
 
 
 class DBExpenseRepository(ExpenseRepository[Expense]):
@@ -236,8 +247,22 @@ class DBExpenseRepository(ExpenseRepository[Expense]):
 
     def get_monthly_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
         """Get monthly totals by user"""
-        return DUMMY_MONTHLY_TOTALS
+        statement = select(Expense).where(Expense.telegram_user_id == telegram_user_id)
+        expenses = self._session.exec(statement).all()
+
+        monthly_totals = defaultdict(Decimal)
+        for expense in expenses:
+            datestr = expense.date.strftime("%Y-%m")
+            monthly_totals[datestr] += expense.amount
+        return monthly_totals
 
     def get_category_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
         """Monthly Totals by category"""
-        return DUMMY_CATEGORY_TOTALS
+        statement = select(Expense).where(Expense.telegram_user_id == telegram_user_id)
+        expenses = self._session.exec(statement).all()
+        category_totals = defaultdict(Decimal)
+        for expense in expenses:
+            if expense.telegram_user_id == telegram_user_id:
+                category = expense.category
+                category_totals[category] += expense.amount
+        return category_totals
