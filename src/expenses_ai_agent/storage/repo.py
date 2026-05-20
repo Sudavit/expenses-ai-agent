@@ -1,11 +1,18 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from decimal import Decimal
 from types import TracebackType
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Expense, ExpenseCategory
+
+DUMMY_MONTHLY_TOTALS = {f"2025-{i}": Decimal(i) for i in range(1, 12)}
+
+DUMMY_CATEGORY_TOTALS = {
+    str(category): Decimal(69.0) for category in ExpenseCategory
+}  # the "str()" is for ty :-(
 
 
 class ExpenseRepository[T](ABC):
@@ -42,6 +49,16 @@ class ExpenseRepository[T](ABC):
 
     @abstractmethod
     def list_by_user(self, telegram_user_id: int) -> list[T]: ...
+
+    @abstractmethod
+    def get_monthly_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
+        """Monthly totals by user"""
+        ...
+
+    @abstractmethod
+    def get_category_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
+        """Monthly Totals by category"""
+        ...
 
 
 class InMemoryExpenseRepository(ExpenseRepository[Expense]):
@@ -127,6 +144,14 @@ class InMemoryExpenseRepository(ExpenseRepository[Expense]):
         ]
         return result
 
+    def get_monthly_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
+        """Get monthly totals by user"""
+        return DUMMY_MONTHLY_TOTALS
+
+    def get_category_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
+        """Monthly Totals by category"""
+        return DUMMY_CATEGORY_TOTALS
+
 
 class DBExpenseRepository(ExpenseRepository[Expense]):
     """
@@ -208,3 +233,11 @@ class DBExpenseRepository(ExpenseRepository[Expense]):
         """Search repository for expenses by a particular user."""
         statement = select(Expense).where(Expense.telegram_user_id == telegram_user_id)
         return list(self._session.exec(statement))
+
+    def get_monthly_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
+        """Get monthly totals by user"""
+        return DUMMY_MONTHLY_TOTALS
+
+    def get_category_totals(self, telegram_user_id: int) -> dict[str, Decimal]:
+        """Monthly Totals by category"""
+        return DUMMY_CATEGORY_TOTALS

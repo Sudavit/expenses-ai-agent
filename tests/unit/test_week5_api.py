@@ -173,3 +173,41 @@ class TestExpenseRoutes:
             assert response.status_code == 201
             data = response.json()
             assert "category" in data
+
+
+class TestCategoryRoutes:
+    """Tests for category routes."""
+
+    def test_list_categories(self, test_client):
+        """GET /categories/ should return all category names."""
+        response = test_client.get("/api/v1/categories/")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert isinstance(data, list)
+        assert "Food" in data
+
+
+class TestAnalyticsRoutes:
+    """Tests for analytics routes."""
+
+    def test_get_summary(self, test_client, mock_expense_repo):
+        """GET /analytics/summary should return aggregated data."""
+        mock_expense_repo.get_category_totals.return_value = {
+            "Food": Decimal("100.00"),
+            "Transport": Decimal("50.00"),
+        }
+        mock_expense_repo.get_monthly_totals.return_value = {
+            "2024-01": Decimal("150.00"),
+        }
+
+        response = test_client.get(
+            "/api/v1/analytics/summary", headers={"X-User-ID": "12345"}
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "category_totals" in data
+        assert "monthly_totals" in data
+        assert data["category_totals"]["Food"] == "100.00"
+        assert data["monthly_totals"]["2024-01"] == "150.00"
