@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from sqlmodel import SQLModel
 
 from expenses_ai_agent.api.deps import engine
+from expenses_ai_agent.api.routes import expenses
 
 
 @asynccontextmanager
@@ -20,6 +21,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.include_router(expenses.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")
