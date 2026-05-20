@@ -55,10 +55,3 @@ class ExpenseListResponse(BaseModel):
     total: int
     page: int
     page_size: int
-
-
-"""
-TODO: where's this go?
-expense = repo.get(expense_id)
-return ExpenseClassifyResponse.model_validate(expense)
-"""
