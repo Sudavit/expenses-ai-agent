@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from expenses_ai_agent.api.deps import get_expense_repo, get_user_id
 from expenses_ai_agent.api.schemas.expense import (
     ExpenseClassifyRequest,
-    ExpenseClassifyResponse,
     ExpenseListResponse,
     ExpenseResponse,
 )
@@ -60,7 +59,11 @@ def delete_one_expense(
     expense_repo.delete(expense_id)
 
 
-@router.post("/classify", response_model=ExpenseClassifyResponse)
+@router.post(
+    "/classify",
+    response_model=ExpenseCategorizationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def classify(
     request: ExpenseClassifyRequest,
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
