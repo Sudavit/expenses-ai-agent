@@ -16,7 +16,7 @@ class ExpenseAPIClient:
         self.base_url = base_url
 
     @st.cache_data(ttl=60)
-    def get_expenses(user_id: int | None = None) -> list[dict]:
+    def get_expenses(self, user_id: int | None = None) -> list[dict]:
         """
         GET /expenses/
         unpack with response.json()["items"] before returning
@@ -36,7 +36,7 @@ class ExpenseAPIClient:
             st.error(f"Backend connection failed: {e}")
             return []
 
-    def classify_expense(description: str, user_id: int | None = None) -> dict:
+    def classify_expense(self, description: str, user_id: int | None = None) -> dict:
         """
         POST /expenses/classify
         """
@@ -55,7 +55,7 @@ class ExpenseAPIClient:
             st.error(f"Backend connection failed: {e}")
             return dict()
 
-    def delete_expense(expense_id: int) -> None:
+    def delete_expense(self, expense_id: int) -> None:
         """
         DELETE /expenses/{expense_id}
         """
@@ -67,7 +67,7 @@ class ExpenseAPIClient:
             st.error(f"Backend connection failed: {e}")
 
     @st.cache_data(ttl=60)
-    def get_summary(user_id: int | None = None) -> dict:
+    def get_summary(self, user_id: int | None = None) -> dict:
         """
         GET /analytics/summary
         """
@@ -80,3 +80,23 @@ class ExpenseAPIClient:
         except requests.exceptions.RequestException as e:
             st.error(f"Backend connection failed: {e}")
             return {}
+
+    def add_expense(
+        self, description: str, amount: float, user_id: int | None = None
+    ) -> None:
+        """
+        POST /expenses/
+        """
+        url = f"{FASTAPI_URL}/expenses/"
+        data = {
+            "description": description,
+            "amount": amount,
+        }
+        if user_id is not None:
+            data["user_id"] = user_id
+
+        try:
+            response = requests.post(url, json=data)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+        except requests.exceptions.RequestException as e:
+            st.error(f"Backend connection failed: {e}")
