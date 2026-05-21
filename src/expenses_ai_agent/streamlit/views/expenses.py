@@ -4,11 +4,10 @@ from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
 
 
 # streamlit/views/expenses.py
-def render(client: ExpenseAPIClient) -> None:
+def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
+
     st.header("Expenses")
-    expenses = ExpenseAPIClient.get_expenses(
-        user_id=1
-    )  # Example user_id, replace with actual user context
+    expenses = client.get_expenses(user_id=user_id)
     # render a row per expense using st.columns
     # left column: category, amount, currency, description
     # right column: st.button("Delete", key=f"del_{item['id']}")

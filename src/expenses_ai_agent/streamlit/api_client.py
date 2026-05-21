@@ -15,8 +15,15 @@ class ExpenseAPIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url
 
-    @st.cache_data(ttl=60)
-    def get_expenses(self, user_id: int | None = None) -> list[dict]:
+    def __hash__(self) -> int:
+        return hash(self.base_url)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ExpenseAPIClient):
+            return False
+        return self.base_url == other.base_url
+
+    def get_expenses(self, user_id: int | None = None) -> dict:
         """
         GET /expenses/
         unpack with response.json()["items"] before returning
@@ -34,7 +41,7 @@ class ExpenseAPIClient:
             return response.json()
         except requests.exceptions.RequestException as e:
             st.error(f"Backend connection failed: {e}")
-            return []
+            return {}
 
     def classify_expense(self, description: str, user_id: int | None = None) -> dict:
         """
@@ -66,7 +73,6 @@ class ExpenseAPIClient:
         except requests.exceptions.RequestException as e:
             st.error(f"Backend connection failed: {e}")
 
-    @st.cache_data(ttl=60)
     def get_summary(self, user_id: int | None = None) -> dict:
         """
         GET /analytics/summary

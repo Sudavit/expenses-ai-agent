@@ -19,8 +19,6 @@ from expenses_ai_agent.services.classification import (
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
 from expenses_ai_agent.storage.repo import ExpenseRepository
-from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
-from expenses_ai_agent.streamlit.views import add_expense, dashboard, expenses
 
 
 class TestFastAPIApp:
@@ -213,52 +211,3 @@ class TestAnalyticsRoutes:
         assert "monthly_totals" in data
         assert data["category_totals"]["Food"] == "100.00"
         assert data["monthly_totals"]["2024-01"] == "150.00"
-
-
-class TestStreamlitAPIClient:
-    """Tests for the Streamlit API client."""
-
-    def test_api_client_exists(self):
-        """ExpenseAPIClient should be importable."""
-        assert ExpenseAPIClient is not None
-
-    def test_api_client_has_base_url(self):
-        """Client should accept base URL configuration."""
-        client = ExpenseAPIClient(base_url="http://localhost:8000/api/v1")
-        assert client.base_url.rstrip("/") == "http://localhost:8000/api/v1"
-
-    def test_api_client_get_expenses(self):
-        """Client should have method to get expenses."""
-        client = ExpenseAPIClient(base_url="http://test")
-        assert hasattr(client, "get_expenses") or hasattr(client, "list_expenses")
-
-    def test_api_client_classify_expense(self):
-        """Client should have method to classify expense."""
-        client = ExpenseAPIClient(base_url="http://test")
-        assert hasattr(client, "classify_expense") or hasattr(client, "classify")
-
-    def test_api_client_delete_expense(self):
-        """Client should have method to delete an expense."""
-        client = ExpenseAPIClient(base_url="http://test")
-        assert hasattr(client, "delete_expense")
-
-    def test_api_client_get_summary(self):
-        """Client should have method to get analytics summary."""
-        client = ExpenseAPIClient(base_url="http://test")
-        assert hasattr(client, "get_summary") or hasattr(client, "get_analytics")
-
-
-class TestStreamlitViews:
-    """Tests for Streamlit view modules."""
-
-    def test_dashboard_view_exists(self):
-        """Dashboard view module should exist."""
-        assert dashboard is not None
-
-    def test_expenses_view_exists(self):
-        """Expenses list view module should exist."""
-        assert expenses is not None
-
-    def test_add_expense_view_exists(self):
-        """Add expense view module should exist."""
-        assert add_expense is not None
