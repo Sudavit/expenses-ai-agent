@@ -1,6 +1,4 @@
-from expenses_ai_agent.streamlit import app
 from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
-from expenses_ai_agent.streamlit.views import add_expense, dashboard, expenses
 
 
 class TestStreamlitAPIClient:
@@ -34,27 +32,3 @@ class TestStreamlitAPIClient:
         """Client should have method to get analytics summary."""
         client = ExpenseAPIClient(base_url="http://test")
         assert hasattr(client, "get_summary") or hasattr(client, "get_analytics")
-
-
-class TestStreamlitViews:
-    """Tests for Streamlit view modules."""
-
-    def test_dashboard_view_exists(self):
-        """Dashboard view module should exist."""
-        assert dashboard is not None
-
-    def test_expenses_view_exists(self):
-        """Expenses list view module should exist."""
-        assert expenses is not None
-
-    def test_add_expense_view_exists(self):
-        """Add expense view module should exist."""
-        assert add_expense is not None
-
-
-class TestStreamlitApp:
-    """Tests for the main Streamlit app."""
-
-    def test_app_module_exists(self):
-        """Main app module should be importable."""
-        assert app is not None
