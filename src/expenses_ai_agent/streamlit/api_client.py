@@ -5,12 +5,12 @@ FASTAPI_URL = "http://127.0.0.1:8000"
 
 
 class ExpenseAPIClient:
-    """
-    Use https for HTTP requests
-    call raise_for_status() to propagate errors.
-    Forward user_id as an X-User-ID header
-        headers={"X-User-ID": str(user_id) if user_id is not None.
-    """
+    """ """
+
+    # TODO: Use httpx for HTTP requests
+    # call raise_for_status() to propagate errors.
+    # Forward user_id as an X-User-ID header
+    #   headers={"X-User-ID": str(user_id) if user_id is not None.
 
     def __init__(self, base_url: str):
         self.base_url = base_url
@@ -23,7 +23,7 @@ class ExpenseAPIClient:
             return False
         return self.base_url == other.base_url
 
-    def get_expenses(self, user_id: int | None = None) -> dict:
+    def get_expenses(self, user_id: int | None = None) -> list[dict]:
         """
         GET /expenses/
         unpack with response.json()["items"] before returning
@@ -38,10 +38,10 @@ class ExpenseAPIClient:
         try:
             response = requests.get(url, params=params)
             response.raise_for_status()  # Raise an exception for HTTP errors
-            return response.json()
+            return response.json()["items"]
         except requests.exceptions.RequestException as e:
             st.error(f"Backend connection failed: {e}")
-            return {}
+            return []
 
     def classify_expense(self, description: str, user_id: int | None = None) -> dict:
         """
@@ -60,7 +60,7 @@ class ExpenseAPIClient:
             return response.json()
         except requests.exceptions.RequestException as e:
             st.error(f"Backend connection failed: {e}")
-            return dict()
+            return {}
 
     def delete_expense(self, expense_id: int) -> None:
         """
