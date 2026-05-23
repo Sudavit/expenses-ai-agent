@@ -1,4 +1,4 @@
-import requests
+import httpx
 import streamlit as st
 
 FASTAPI_URL = "http://127.0.0.1:8000"
@@ -7,13 +7,14 @@ FASTAPI_URL = "http://127.0.0.1:8000"
 class ExpenseAPIClient:
     """ """
 
-    # TODO: Use httpx for HTTP requests
+    # TODO:
     # call raise_for_status() to propagate errors.
     # Forward user_id as an X-User-ID header
     #   headers={"X-User-ID": str(user_id) if user_id is not None.
 
     def __init__(self, base_url: str):
         self.base_url = base_url
+        self.client = httpx.Client(base_url=base_url)
 
     def __hash__(self) -> int:
         return hash(self.base_url)
@@ -27,8 +28,6 @@ class ExpenseAPIClient:
         """
         GET /expenses/
         unpack with response.json()["items"] before returning
-
-
         Fetches expenses from the FastAPI backend.
         Uses st.cache_data so you don't DDoS your own API on every Streamlit rerun.
         """
@@ -36,10 +35,10 @@ class ExpenseAPIClient:
         params = {"user_id": user_id} if user_id else {}
 
         try:
-            response = requests.get(url, params=params)
+            response = self.client.get(url, params=params)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()["items"]
-        except requests.exceptions.RequestException as e:
+        except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
             return []
 
@@ -55,10 +54,10 @@ class ExpenseAPIClient:
             params = {"description": description, "user_id": user_id}
 
         try:
-            response = requests.post(url, params=params)
+            response = self.client.post(url, params=params)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()
-        except requests.exceptions.RequestException as e:
+        except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
             return {}
 
@@ -68,9 +67,9 @@ class ExpenseAPIClient:
         """
         url = f"{FASTAPI_URL}/expenses/{expense_id}"
         try:
-            response = requests.delete(url)
+            response = self.client.delete(url)
             response.raise_for_status()  # Raise an exception for HTTP errors
-        except requests.exceptions.RequestException as e:
+        except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
 
     def get_summary(self, user_id: int | None = None) -> dict:
@@ -80,10 +79,10 @@ class ExpenseAPIClient:
         url = f"{FASTAPI_URL}/analytics/summary"
         params = {"user_id": user_id} if user_id else {}
         try:
-            response = requests.get(url, params=params)
+            response = self.client.get(url, params=params)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()
-        except requests.exceptions.RequestException as e:
+        except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
             return {}
 
@@ -102,7 +101,7 @@ class ExpenseAPIClient:
             data["user_id"] = user_id
 
         try:
-            response = requests.post(url, json=data)
+            response = self.client.post(url, json=data)
             response.raise_for_status()  # Raise an exception for HTTP errors
-        except requests.exceptions.RequestException as e:
+        except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
