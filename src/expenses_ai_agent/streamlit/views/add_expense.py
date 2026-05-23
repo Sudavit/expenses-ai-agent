@@ -1,4 +1,5 @@
 import streamlit as st
+from httpx import RequestError
 
 from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
 
@@ -7,29 +8,26 @@ from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
 def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
 
     st.header("Add Expense")
-    description = st.text_input("Description")
-    amount = st.text_input("Amount")
 
     with st.form("add_expense_form"):
-        st.text_input("Description", key="description")
-        st.text_input("Amount", key="amount")
+        description = st.text_input("Description", key="description")
+        submitted = st.form_submit_button("Add Expense")
 
-        if st.form_submit_button("Add Expense"):
-            # Handle form submission
-            submitted = True
+    if not submitted:
+        return
 
-    if submitted and description.strip() and amount.strip():
-        try:
-            amount_value = float(amount)
-            # Call API to add expense
-            client.add_expense(
-                description=description, amount=amount_value, user_id=user_id
-            )
-            st.success("Expense added successfully!")
-        except ValueError:
-            st.error("Please enter a valid number for amount.")
-    elif submitted:
-        st.error("Please fill in all fields.")
+    if not description.strip():
+        st.warning("Please fill in all fields.")
+        return
 
-    with st.spinner("Adding expense..."):
-        client.classify_expense(description=description, user_id=user_id)
+    try:
+        classification = client.classify_expense(
+            description=description, user_id=user_id
+        )
+    except RequestError:
+        st.error("Cannot connect to the backend.")
+        return
+
+    amount_value = float(classification["total_amount"])
+    client.add_expense(description=description, amount=amount_value, user_id=user_id)
+    st.success(f"Expense added successfully! Category: {classification['category']}")

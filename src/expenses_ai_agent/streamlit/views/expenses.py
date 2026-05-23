@@ -14,6 +14,11 @@ def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
     except RequestError:
         st.error("Cannot connect to the backend.")
         return
+
+    if not expenses:
+        st.info("No expenses found.")
+        return
+
     # render a row per expense using st.columns
     # left column: category, amount, currency, description
     # right column: st.button("Delete", key=f"del_{item['id']}")
