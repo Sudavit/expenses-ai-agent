@@ -11,6 +11,7 @@ from expenses_ai_agent.llms.openai import OpenAIAssistant
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 from expenses_ai_agent.services.classification import ClassificationService
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
+from expenses_ai_agent.storage.models import Expense
 from expenses_ai_agent.storage.repo import ExpenseRepository
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
@@ -54,6 +55,29 @@ def get_one_expense(
     return ExpenseResponse.model_validate(expense)
 
 
+@router.post("/", response_model=ExpenseResponse, status_code=status.HTTP_201_CREATED)
+def create_expense(
+    expense_data: ExpenseResponse,
+    expense_repo: ExpenseRepository = Depends(get_expense_repo),
+    user_id: int = Depends(get_user_id),
+) -> ExpenseResponse:
+    """
+    Explicit storage write endpoint. Allows Streamlit/CLI components to save
+    validated or classified financial entities into the persistent DB tree.
+    """
+    # Create the db model, map the resolved user identity safely
+    db_expense = Expense(
+        amount=expense_data.amount,
+        currency=expense_data.currency,
+        date=expense_data.date,
+        description=expense_data.description,
+        telegram_user_id=user_id,
+        category=expense_data.category,
+    )
+    expense_repo.add(db_expense)
+    return ExpenseResponse.model_validate(db_expense)
+
+
 @router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_one_expense(
     expense_id: int,
@@ -79,7 +103,6 @@ def classify(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseCategorizationResponse:
-    # Set the model fallback to gpt-4o-mini
     model = config("OPENAI_MODEL", default="gpt-4o-mini")
     api_key = config("OPENAI_API_KEY", default="")
 
