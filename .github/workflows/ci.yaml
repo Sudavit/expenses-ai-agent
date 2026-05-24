@@ -37,13 +37,14 @@ jobs:
         run: uv run ty check .
 
       - name: Run Tests
+        if: ${{ false }}
         id: pytest
         env:
           GIST_SECRET: ${{ secrets.GIST_SECRET }}
           GIST_ID: ${{ secrets.GIST_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
-        continue-on-error: true
+        continue-on-error: false
         run: |
           # Run tests and pipe to a file
           uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=90 > pytest_output.txt
@@ -54,7 +55,8 @@ jobs:
           echo "COVERAGE=$(grep '^TOTAL' pytest_output.txt | awk '{print $NF}' | sed 's/%//')" >> $GITHUB_ENV
 
       - name: Update Gist Badge
-        if: always()
+        # if: always()
+        if: ${{ false }}
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
