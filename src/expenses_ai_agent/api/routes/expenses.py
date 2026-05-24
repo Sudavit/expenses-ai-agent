@@ -26,8 +26,12 @@ def list_expenses(
     expenses = expense_repo.list_by_user(user_id)
     start = (page - 1) * page_size
     end = start + page_size
+    sliced_expenses = expenses[start:end]
+
+    items = [ExpenseResponse.model_validate(e) for e in sliced_expenses]
+
     return ExpenseListResponse(
-        items=expenses[start:end],
+        items=items,
         total=len(expenses),
         page=page,
         page_size=page_size,
@@ -56,7 +60,13 @@ def delete_one_expense(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> None:
-    expense_repo.delete(expense_id)
+    try:
+        expense_repo.delete(expense_id)
+    except ExpenseNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Expense with id {expense_id} not found",
+        )
 
 
 @router.post(
@@ -69,7 +79,8 @@ def classify(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseCategorizationResponse:
-    model = "gpt-4.1-nano-2025-04-14"
+    # Set the model fallback to gpt-4o-mini
+    model = config("OPENAI_MODEL", default="gpt-4o-mini")
     api_key = config("OPENAI_API_KEY", default="")
 
     assistant = OpenAIAssistant(model=model, api_key=api_key)
