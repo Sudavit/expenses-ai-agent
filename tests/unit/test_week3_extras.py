@@ -38,7 +38,9 @@ class TestCLIAppExtras:
     """Extra Tests for CLI application."""
 
     def test_classify_specify_database_works(self, cli_runner):
-        result = cli_runner.invoke(app, ["USD$25", "--db", "sqlite:///:memory:"])
+        result = cli_runner.invoke(
+            app, ["USD$25", "--db", "sqlite:///:memory:"], catch_exceptions=False
+        )
         # check the syntax is parsed
         assert result.exit_code == 0
         # check for persistence
@@ -63,7 +65,7 @@ class TestCLIAppExtras:
         # Unset the variable for this test only
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
-        result = cli_runner.invoke(app, ["Coffee"])
+        result = cli_runner.invoke(app, ["Coffee"], catch_exceptions=False)
         # exits okay
         assert result.exit_code == 0
         pattern = r"no llm key supplied"

@@ -373,11 +373,11 @@ class TestCLIApp:
         assert app is not None
 
     def test_classify_command_exists(self, cli_runner):
-        result = cli_runner.invoke(app, ["--help"])
+        result = cli_runner.invoke(app, ["--help"], catch_exceptions=False)
         assert result.exit_code == 0
 
     def test_classify_requires_description(self, cli_runner):
-        result = cli_runner.invoke(app, [])
+        result = cli_runner.invoke(app, [], catch_exceptions=False)
         assert result.exit_code != 0 or "missing" in result.output.lower()
 
     def test_classify_with_mocked_service(
@@ -394,12 +394,14 @@ class TestCLIApp:
             mock_service_cls.return_value = mock_service
 
             with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
-                result = cli_runner.invoke(app, ["Coffee at Starbucks $5.50"])
+                result = cli_runner.invoke(
+                    app, ["Coffee at Starbucks $5.50"], catch_exceptions=False
+                )
                 assert result.exit_code == 0
                 assert "Food" in result.output
 
     def test_classify_db_option_exists(self, cli_runner):
-        result = cli_runner.invoke(app, ["classify", "--help"])
+        result = cli_runner.invoke(app, ["classify", "--help"], catch_exceptions=False)
         assert "--db" in result.output or "database" in result.output.lower()
 
     def test_cli_outputs_category_info(self, cli_runner, mock_classification_response):
@@ -414,7 +416,9 @@ class TestCLIApp:
             mock_service_cls.return_value = mock_service
 
             with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
-                result = cli_runner.invoke(app, ["Test expense"])
+                result = cli_runner.invoke(
+                    app, ["Test expense"], catch_exceptions=False
+                )
                 output = result.output
                 assert "Food" in output
                 assert "5.50" in output
