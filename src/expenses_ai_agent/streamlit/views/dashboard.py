@@ -18,34 +18,37 @@ def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
         st.error("Cannot connect to the backend.")
         return
 
-    # pie chart of summary["category_totals"]["category_breakdown"]
+    # pie chart of summary["category_totals"]
     # with plotly express, title "Expenses by Category"
     # show st.info if the data dictionary is empty.
-    if not summary["category_totals"].get("category_breakdown"):
+    # Safely attempt to parse the original key structure
+
+    category_data = summary["category_totals"] if summary else None
+    if not category_data:
         st.info("No expense data available for category breakdown.")
     else:
-        px.pie(
-            names=summary["category_totals"].get("category_breakdown", {}).keys(),
-            values=[
-                float(v)
-                for v in summary["category_totals"]
-                .get("category_breakdown", {})
-                .values()
-            ],
+        fig_pie = px.pie(
+            names=list(category_data.keys()),
+            values=[float(v) for v in category_data.values()],
             title="Expenses by Category",
         )
+        st.plotly_chart(fig_pie)
 
-    # pie chart of summary["category_totals"]["category_breakdown"]
+    category_data = summary.get("category_totals", {}) if summary else {}
+
+    # pie chart of summary["category_totals"]
     # with plotly express, title "Expenses by Category"
     # show st.info if the data dictionary is empty.
-    if not summary["monthly_totals"].get("monthly_totals"):
+
+    monthly_data = summary["monthly_totals"] if summary else None
+    if not monthly_data:
         st.info("No expense data available for monthly trends.")
     else:
-        px.bar(
-            x=list(summary["monthly_totals"].get("monthly_totals", {}).keys()),
-            y=[
-                float(v)
-                for v in summary["monthly_totals"].get("monthly_totals", {}).values()
-            ],
+        fig_bar = px.bar(
+            x=list(monthly_data.keys()),
+            y=[float(v) for v in monthly_data.values()],
             title="Monthly Expenses",
         )
+        st.plotly_chart(fig_bar)
+
+    monthly_data = summary.get("category_totals", {}) if summary else {}
