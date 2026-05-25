@@ -1,20 +1,12 @@
 import httpx
 import streamlit as st
 
-FASTAPI_URL = "http://127.0.0.1:8000"
-
 
 class ExpenseAPIClient:
-    """ """
-
-    # TODO:
-    # call raise_for_status() to propagate errors.
-    # Forward user_id as an X-User-ID header
-    #   headers={"X-User-ID": str(user_id) if user_id is not None.
-
     def __init__(self, base_url: str):
-        self.base_url = base_url
-        self.client = httpx.Client(base_url=base_url)
+        # Strip trailing slashes to guarantee clean routing appends
+        self.base_url = base_url.rstrip("/")
+        self.client = httpx.Client(base_url=self.base_url)
 
     def __hash__(self) -> int:
         return hash(self.base_url)
@@ -31,11 +23,13 @@ class ExpenseAPIClient:
         Fetches expenses from the FastAPI backend.
         Uses st.cache_data so you don't DDoS your own API on every Streamlit rerun.
         """
-        url = f"{FASTAPI_URL}/expenses/"
+        url = f"{self.base_url}/expenses/"
+        # Support passing identity cleanly via headers or query text
         params = {"user_id": user_id} if user_id else {}
+        headers = {"X-User-ID": str(user_id)} if user_id else {}
 
         try:
-            response = self.client.get(url, params=params)
+            response = self.client.get(url, params=params, headers=headers)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()["items"]
         except httpx.ConnectError as e:
@@ -46,15 +40,13 @@ class ExpenseAPIClient:
         """
         POST /expenses/classify
         """
-        url = f"{FASTAPI_URL}/expenses/classify"
-        params = {}
-        if user_id is None:
-            params = {"description": description}
-        else:
-            params = {"description": description, "user_id": user_id}
+        url = f"{self.base_url}/expenses/classify"
+        # Match Pydantic payload body expectations
+        body = {"description": description}
+        headers = {"X-User-ID": str(user_id)} if user_id else {}
 
         try:
-            response = self.client.post(url, params=params)
+            response = self.client.post(url, json=body, headers=headers)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()
         except httpx.ConnectError as e:
@@ -65,7 +57,7 @@ class ExpenseAPIClient:
         """
         DELETE /expenses/{expense_id}
         """
-        url = f"{FASTAPI_URL}/expenses/{expense_id}"
+        url = f"{self.base_url}/expenses/{expense_id}"
         try:
             response = self.client.delete(url)
             response.raise_for_status()  # Raise an exception for HTTP errors
@@ -76,10 +68,11 @@ class ExpenseAPIClient:
         """
         GET /analytics/summary
         """
-        url = f"{FASTAPI_URL}/analytics/summary"
+        url = f"{self.base_url}/analytics/summary"
         params = {"user_id": user_id} if user_id else {}
+        headers = {"X-User-ID": str(user_id)} if user_id else {}
         try:
-            response = self.client.get(url, params=params)
+            response = self.client.get(url, params=params, headers=headers)
             response.raise_for_status()  # Raise an exception for HTTP errors
             return response.json()
         except httpx.ConnectError as e:
@@ -92,16 +85,19 @@ class ExpenseAPIClient:
         """
         POST /expenses/
         """
-        url = f"{FASTAPI_URL}/expenses/"
+        url = f"{self.base_url}/expenses/"
         data = {
             "description": description,
             "amount": amount,
+            "currency": "EUR",  # Fallback to schema requirement baseline
+            "date": "2026-05-24T00:00:00",
+            "telegram_user_id": user_id,
+            "category": "Other",
         }
-        if user_id is not None:
-            data["user_id"] = user_id
+        headers = {"X-User-ID": str(user_id)} if user_id else {}
 
         try:
-            response = self.client.post(url, json=data)
+            response = self.client.post(url, json=data, headers=headers)
             response.raise_for_status()  # Raise an exception for HTTP errors
         except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
