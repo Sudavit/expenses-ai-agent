@@ -61,11 +61,6 @@ def create_expense(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseResponse:
-    """
-    Explicit storage write endpoint. Allows Streamlit/CLI components to save
-    validated or classified financial entities into the persistent DB tree.
-    """
-    # Create the db model, map the resolved user identity safely
     db_expense = Expense(
         amount=expense_data.amount,
         currency=expense_data.currency,

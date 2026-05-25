@@ -4,7 +4,6 @@ import streamlit as st
 
 class ExpenseAPIClient:
     def __init__(self, base_url: str):
-        # Strip trailing slashes to guarantee clean routing appends
         self.base_url = base_url.rstrip("/")
         self.client = httpx.Client(base_url=self.base_url)
 
@@ -24,13 +23,12 @@ class ExpenseAPIClient:
         Uses st.cache_data so you don't DDoS your own API on every Streamlit rerun.
         """
         url = f"{self.base_url}/expenses/"
-        # Support passing identity cleanly via headers or query text
         params = {"user_id": user_id} if user_id else {}
         headers = {"X-User-ID": str(user_id)} if user_id else {}
 
         try:
             response = self.client.get(url, params=params, headers=headers)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
             return response.json()["items"]
         except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
@@ -41,13 +39,12 @@ class ExpenseAPIClient:
         POST /expenses/classify
         """
         url = f"{self.base_url}/expenses/classify"
-        # Match Pydantic payload body expectations
         body = {"description": description}
         headers = {"X-User-ID": str(user_id)} if user_id else {}
 
         try:
             response = self.client.post(url, json=body, headers=headers)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
             return response.json()
         except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
@@ -60,7 +57,7 @@ class ExpenseAPIClient:
         url = f"{self.base_url}/expenses/{expense_id}"
         try:
             response = self.client.delete(url)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
         except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
 
@@ -73,7 +70,7 @@ class ExpenseAPIClient:
         headers = {"X-User-ID": str(user_id)} if user_id else {}
         try:
             response = self.client.get(url, params=params, headers=headers)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
             return response.json()
         except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
@@ -86,11 +83,14 @@ class ExpenseAPIClient:
         POST /expenses/
         """
         url = f"{self.base_url}/expenses/"
+
+        # Build a complete schema layout to pass Pydantic validation checks
         data = {
+            "id": None,
             "description": description,
-            "amount": amount,
-            "currency": "EUR",  # Fallback to schema requirement baseline
-            "date": "2026-05-24T00:00:00",
+            "amount": str(amount),
+            "currency": "EUR",
+            "date": "2026-05-24T12:00:00Z",
             "telegram_user_id": user_id,
             "category": "Other",
         }
@@ -98,6 +98,8 @@ class ExpenseAPIClient:
 
         try:
             response = self.client.post(url, json=data, headers=headers)
-            response.raise_for_status()  # Raise an exception for HTTP errors
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            st.error(f"Backend validation rejected transaction: {e.response.text}")
         except httpx.ConnectError as e:
             st.error(f"Backend connection failed: {e}")
