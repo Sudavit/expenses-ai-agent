@@ -8,6 +8,8 @@ Build `cli/cli.py` using Typer:
 - Use Rich for formatted output via a private `_display_result(result)` helper:
 """
 
+from contextlib import nullcontext
+
 import typer
 from decouple import config
 from rich.console import Console
@@ -57,9 +59,12 @@ def classify(
         raise typer.Exit(code=0)
 
     try:
-        service = _build_service(assistant=assistant, db_name=db_name)
-        result = service.classify(description, persist=persist)
-        _display_result(result)
+        db_url = config("DATABASE_URL", default="sqlite:///expenses.db") if db_name == "default" else db_name
+        repo_ctx = DBExpenseRepository(db_url=db_url) if db_url else nullcontext()
+        with repo_ctx as repo:
+            service = ClassificationService(assistant=assistant, expense_repo=repo)
+            result = service.classify(description, persist=persist)
+            _display_result(result)
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         if verbose:
@@ -81,11 +86,3 @@ def _display_result(result: ClassificationResult) -> None:
     console.print(table)
 
 
-def _build_service(
-    assistant: OpenAIAssistant, db_name: str | None
-) -> ClassificationService:
-    if db_name == "default":
-        db_name = config("DATABASE_URL", default="sqlite:///expenses.db")
-
-    expense_repo = DBExpenseRepository(db_url=db_name) if db_name else None
-    return ClassificationService(assistant=assistant, expense_repo=expense_repo)

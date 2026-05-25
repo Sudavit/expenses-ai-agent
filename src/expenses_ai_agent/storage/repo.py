@@ -176,19 +176,22 @@ class DBExpenseRepository(ExpenseRepository[Expense]):
 
     def __init__(self, db_url: str, session: Session | None = None):
         self._db_url = db_url
-        if session:
+        if session is not None:
+            self._engine = None
             self._session = session
             self._owns_session = False  # External session, don't close it
         else:
-            engine = create_engine(db_url)
-            SQLModel.metadata.create_all(engine)
-            self._session = Session(engine)
+            self._engine = create_engine(db_url)
+            SQLModel.metadata.create_all(self._engine)
+            self._session = Session(self._engine)
             self._owns_session = True
 
     def close(self) -> None:
         """Close the database session if we own it."""
         if self._owns_session and self._session:
             self._session.close()
+        if self._engine:
+            self._engine.dispose()
 
     def __enter__(self):
         return self
