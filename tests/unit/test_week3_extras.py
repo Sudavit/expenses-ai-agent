@@ -1,14 +1,18 @@
 import re
 from decimal import Decimal
+from unittest.mock import create_autospec, patch
 
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
 from typer.testing import CliRunner
 
 from expenses_ai_agent.cli.cli import app
+from expenses_ai_agent.llms.exceptions import LLMNoKeyError
+from expenses_ai_agent.services.classification import ClassificationResult, ClassificationService
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
 from expenses_ai_agent.storage.repo import DBExpenseRepository
+from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 
 BAD_ID = 999
 
@@ -38,9 +42,30 @@ class TestCLIAppExtras:
     """Extra Tests for CLI application."""
 
     def test_classify_specify_database_works(self, cli_runner):
-        result = cli_runner.invoke(
-            app, ["USD$25", "--db", "sqlite:///:memory:"], catch_exceptions=False
+        mock_response = ExpenseCategorizationResponse(
+            category=ExpenseCategory.SHOPPING,
+            total_amount=Decimal("25.00"),
+            currency=Currency.USD,
+            confidence=0.95,
+            cost=Decimal("0.001"),
         )
+        with patch("expenses_ai_agent.cli.cli.OpenAIAssistant"):
+            with patch(
+                "expenses_ai_agent.cli.cli.ClassificationService"
+            ) as mock_service_cls:
+                mock_service = create_autospec(ClassificationService)
+                mock_result = ClassificationResult(
+                    response=mock_response, persisted=True
+                )
+                mock_service.classify.return_value = mock_result
+                mock_service_cls.return_value = mock_service
+
+                result = cli_runner.invoke(
+                    app,
+                    ["USD$25", "--db", "sqlite:///:memory:"],
+                    catch_exceptions=False,
+                )
+
         # check the syntax is parsed
         assert result.exit_code == 0
         # check for persistence
@@ -65,7 +90,14 @@ class TestCLIAppExtras:
         # Unset the variable for this test only
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
-        result = cli_runner.invoke(app, ["Coffee"], catch_exceptions=False)
+        # python-decouple reads from .env files independently of os.environ, so
+        # monkeypatch.delenv alone is not enough — patch OpenAIAssistant directly
+        # to raise LLMNoKeyError, which is the contract the CLI handles.
+        with patch(
+            "expenses_ai_agent.cli.cli.OpenAIAssistant",
+            side_effect=LLMNoKeyError("no key"),
+        ):
+            result = cli_runner.invoke(app, ["Coffee"], catch_exceptions=False)
         # exits okay
         assert result.exit_code == 0
         pattern = r"no llm key supplied"
