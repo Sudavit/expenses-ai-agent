@@ -65,7 +65,7 @@ respect-type-ignore-comments = true
 # This tells pytest: "Always look inside 'src' for my packages, and 'tests' for my tests
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "--cov=expenses_ai_agent --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "--cov=src --cov-report=term-missing --cov-report=html --cov-report=xml"
 
 [tool.coverage.run]
 source = ["."]
@@ -77,8 +77,14 @@ exclude_lines = [
     "def __repr__",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
+    "@abstractmethod",
     "\\.\\.\\."
 ]
+fail_under = 85 # should be 95 or 100
+show_missing = true
+
+[tool.fastapi]
+entrypoint = "src.expenses_ai_agent.api.main:app"
 
 [tool.mutmut]
    paths = ["src"]
