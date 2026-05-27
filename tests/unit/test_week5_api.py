@@ -146,6 +146,7 @@ class TestExpenseRoutes:
         assert response.status_code == 204
         mock_expense_repo.delete.assert_called_with(1)
 
+    @pytest.mark.secrets
     def test_classify_expense(self, test_client, mock_expense_repo):
         """POST /expenses/classify should classify and store expense."""
         with patch(

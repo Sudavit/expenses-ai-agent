@@ -65,7 +65,7 @@ respect-type-ignore-comments = true
 # This tells pytest: "Always look inside 'src' for my packages, and 'tests' for my tests
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "--cov=src --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "--cov=src --cov-report=term-missing -m 'not secrets'"
 
 [tool.coverage.run]
 source = ["."]
@@ -73,7 +73,7 @@ omit = ["tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
+    "pragma: no cov",
     "def __repr__",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",

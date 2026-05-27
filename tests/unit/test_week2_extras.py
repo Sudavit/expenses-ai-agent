@@ -37,6 +37,7 @@ class TestToolSchemas:
 class TestAPIKeyConfig:
     """Test ability to get API keys"""
 
+    @pytest.mark.secrets
     def test_api_keys_accessible(self):
         """All secret keys available, non-empty strings"""
         for api_key in ["EXCHANGE_RATE_API_KEY", "OPENAI_API_KEY"]:
@@ -58,6 +59,7 @@ class TestCurrencyExceptions:
         assert isinstance(error, Exception)
         assert "Currency conversion failure" in str(error)
 
+    @pytest.mark.secrets
     def test_bad_currency_conversion_raises(self):
         """Converting to a non-existing currency should raise an exception."""
         with pytest.raises(CurrencyConversionError):
@@ -71,6 +73,7 @@ class TestCurrencyExceptions:
 
 
 class TestCalculateCost:
+    @pytest.mark.secrets
     def test_calculate_cost_correctly(self):
         """
         Call the function, get a correct return.

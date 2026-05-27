@@ -5,6 +5,7 @@ from enum import StrEnum
 from typing import Protocol  # used in test_assistant_protocol_exists assertion below
 from unittest.mock import MagicMock, patch
 
+import pytest
 from pydantic import BaseModel
 
 from expenses_ai_agent.llms.base import Assistant, Cost, LLMProvider, Messages
@@ -183,6 +184,7 @@ class TestCurrencyConversion:
 
             assert isinstance(result, Decimal)
 
+    @pytest.mark.secrets
     def test_convert_currency_same_currency(self):
         """Converting to the same currency should return the original amount."""
         result = convert_currency(Decimal("50.00"), "EUR", "EUR")
