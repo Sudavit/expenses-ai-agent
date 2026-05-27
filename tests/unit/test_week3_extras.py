@@ -8,11 +8,14 @@ from typer.testing import CliRunner
 
 from expenses_ai_agent.cli.cli import app
 from expenses_ai_agent.llms.exceptions import LLMNoKeyError
-from expenses_ai_agent.services.classification import ClassificationResult, ClassificationService
+from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
+from expenses_ai_agent.services.classification import (
+    ClassificationResult,
+    ClassificationService,
+)
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
 from expenses_ai_agent.storage.repo import DBExpenseRepository
-from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
 
 BAD_ID = 999
 
