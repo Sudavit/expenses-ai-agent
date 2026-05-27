@@ -15,7 +15,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install Python and dependencies
-        run: | 
+        run: |
           uv python install 3.13
           uv sync
 
@@ -78,7 +78,7 @@ jobs:
       - name: Set up Python and dependencies
         run: |
           uv python install 3.13
-          uv sync --all-extras --dev  
+          uv sync --all-extras --dev
 
       - name: check formatting
         run: uv run ruff format --check .
