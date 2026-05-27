@@ -59,7 +59,11 @@ def classify(
         raise typer.Exit(code=0)
 
     try:
-        db_url = config("DATABASE_URL", default="sqlite:///expenses.db") if db_name == "default" else db_name
+        db_url = (
+            config("DATABASE_URL", default="sqlite:///expenses.db")
+            if db_name == "default"
+            else db_name
+        )
         repo_ctx = DBExpenseRepository(db_url=db_url) if db_url else nullcontext()
         with repo_ctx as repo:
             service = ClassificationService(assistant=assistant, expense_repo=repo)
@@ -84,5 +88,3 @@ def _display_result(result: ClassificationResult) -> None:
     table.add_row("Persisted", "Yes" if result.persisted else "No")
 
     console.print(table)
-
-
