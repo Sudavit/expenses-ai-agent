@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master, "week*", code-review ]
+    branches: [ master, "week*", code-review-fix ]
   pull_request:
     branches: [ master ]
 
@@ -30,7 +30,6 @@ jobs:
           uv sync
 
       - name: Run Tests with Coverage
-        if: ${{ false }}
         run: uv run pytest -m "not integration" --cov=src --cov-report=xml --cov-fail-under=85. # Should be >=95%
         env:
           # GIST_SECRET: ${{ secrets.GIST_SECRET }}
