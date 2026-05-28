@@ -52,22 +52,20 @@ def test_client(mock_expense_repo):
     app.dependency_overrides.clear()
 
 
+@pytest.mark.integration
 class TestSecrets:
-    @pytest.mark.integration
     def test_convert_currency_same_currency(self):
         """Converting to the same currency should return the original amount."""
         result = convert_currency(Decimal("50.00"), "EUR", "EUR")
 
         assert result == Decimal("50.00")
 
-    @pytest.mark.integration
     def test_api_keys_accessible(self):
         """All secret keys available, non-empty strings"""
         for api_key in ["EXCHANGE_RATE_API_KEY", "OPENAI_API_KEY"]:
             assert config(api_key, default="")
             assert isinstance(api_key, str)
 
-    @pytest.mark.integration
     def test_bad_currency_conversion_raises(self):
         """Converting to a non-existing currency should raise an exception."""
         with pytest.raises(CurrencyConversionError):
@@ -79,7 +77,6 @@ class TestSecrets:
                 to_currency="CTM",
             )
 
-    @pytest.mark.integration
     def test_calculate_cost_correctly(self):
         """
         Call the function, get a correct return.
@@ -95,7 +92,6 @@ class TestSecrets:
             / Decimal(1_000_000)
         )
 
-    @pytest.mark.integration
     def test_classify_expense(self, test_client, mock_expense_repo):
         """POST /expenses/classify should classify and store expense."""
         with patch(
