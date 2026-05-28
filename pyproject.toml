@@ -65,7 +65,11 @@ respect-type-ignore-comments = true
 # This tells pytest: "Always look inside 'src' for my packages, and 'tests' for my tests
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = "--cov=src --cov-report=term-missing -m 'not secrets'"
+markers = [
+    "integration: integration tests, which require interacting with other services (databases, LLMs, ...)",
+    "secrets: tests that require secret keys",
+]
+addopts = "--cov=src --cov-report=term-missing"
 
 [tool.coverage.run]
 source = ["."]

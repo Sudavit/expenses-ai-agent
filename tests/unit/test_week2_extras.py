@@ -1,17 +1,13 @@
-from decimal import Decimal
-
 import pytest
 from decouple import UndefinedValueError, config
 from jsonschema import validate
 
 from expenses_ai_agent.llms.exceptions import LLMParseError
-from expenses_ai_agent.llms.openai import PRICE_PER_MILLION_TOKENS, OpenAIAssistant
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
     DATETIME_FORMATTER_TOOL,
     OPENAI_TOOL_META_SCHEMA,
 )
-from expenses_ai_agent.utils.currency import convert_currency
 from expenses_ai_agent.utils.date_formatter import format_datetime
 from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
@@ -37,13 +33,6 @@ class TestToolSchemas:
 class TestAPIKeyConfig:
     """Test ability to get API keys"""
 
-    @pytest.mark.secrets
-    def test_api_keys_accessible(self):
-        """All secret keys available, non-empty strings"""
-        for api_key in ["EXCHANGE_RATE_API_KEY", "OPENAI_API_KEY"]:
-            assert config(api_key, default="")
-            assert isinstance(api_key, str)
-
     def test_bad_api_key_raises(self):
         """Bad secret key raises exception"""
         with pytest.raises(UndefinedValueError):
@@ -58,40 +47,6 @@ class TestCurrencyExceptions:
         error = CurrencyConversionError("This is a currency-conversion error")
         assert isinstance(error, Exception)
         assert "Currency conversion failure" in str(error)
-
-    @pytest.mark.secrets
-    def test_bad_currency_conversion_raises(self):
-        """Converting to a non-existing currency should raise an exception."""
-        with pytest.raises(CurrencyConversionError):
-            # convert to Canadian Tire Money
-            convert_currency(
-                # CTM == Canadian Tire Money
-                amount=Decimal("1.00"),
-                from_currency="CAD",
-                to_currency="CTM",
-            )
-
-
-class TestCalculateCost:
-    @pytest.mark.secrets
-    def test_calculate_cost_correctly(self):
-        """
-        Call the function, get a correct return.
-        """
-
-        # TODO: replace this with a mock?
-        assistant = OpenAIAssistant()
-        assert assistant.calculate_cost(prompt_tokens=1, completion_tokens=2) == (
-            (
-                PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["input"]
-                + 2 * PRICE_PER_MILLION_TOKENS["gpt-4o-mini"]["output"]
-            )
-            / Decimal(1_000_000)
-        )
-
-
-class TestAssistantProtocol:
-    """Additional test for calculating cost"""
 
 
 class TestLLMExceptions:

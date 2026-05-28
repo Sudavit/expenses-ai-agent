@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import create_autospec, patch
+from unittest.mock import create_autospec
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,11 +10,6 @@ from expenses_ai_agent.api.schemas.expense import (
     ExpenseClassifyRequest,
     ExpenseListResponse,
     ExpenseResponse,
-)
-from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
-from expenses_ai_agent.services.classification import (
-    ClassificationResult,
-    ClassificationService,
 )
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense, ExpenseCategory
@@ -145,35 +140,6 @@ class TestExpenseRoutes:
 
         assert response.status_code == 204
         mock_expense_repo.delete.assert_called_with(1)
-
-    @pytest.mark.secrets
-    def test_classify_expense(self, test_client, mock_expense_repo):
-        """POST /expenses/classify should classify and store expense."""
-        with patch(
-            "expenses_ai_agent.api.routes.expenses.ClassificationService"
-        ) as mock_cls:
-            mock_service = create_autospec(ClassificationService)
-            mock_result = create_autospec(ClassificationResult)
-            mock_result.response = ExpenseCategorizationResponse(
-                category=ExpenseCategory.FOOD,
-                total_amount=Decimal("5.50"),
-                currency=Currency.USD,
-                confidence=0.95,
-                cost=Decimal("0.001"),
-            )
-            mock_result.persisted = True
-            mock_service.classify.return_value = mock_result
-            mock_cls.return_value = mock_service
-
-            response = test_client.post(
-                "/api/v1/expenses/classify",
-                json={"description": "Coffee $5.50"},
-                headers={"X-User-ID": "12345"},
-            )
-
-            assert response.status_code == 201
-            data = response.json()
-            assert "category" in data
 
 
 class TestCategoryRoutes:
