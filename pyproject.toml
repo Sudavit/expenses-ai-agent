@@ -31,6 +31,7 @@ dev = [
     "ty>=0.0.28",
     "mutmut>=3.5.0",
     "tbump>=6.11.0",
+    "pytest-env>=1.6.0",
 ]
 
 [build-system]
@@ -65,11 +66,14 @@ respect-type-ignore-comments = true
 # This tells pytest: "Always look inside 'src' for my packages, and 'tests' for my tests
 pythonpath = ["src"]
 testpaths = ["tests"]
+env = [
+    "D:EXCHANGE_RATE_API_KEY=dummy_value",  # for unit testing
+]
 markers = [
     "integration: integration tests, which require interacting with other services (databases, LLMs, ...)",
     "secrets: tests that require secret keys",
 ]
-addopts = "--cov=src --cov-report=term-missing"
+addopts = "--cov=src --cov-fail-under=85"
 
 [tool.coverage.run]
 source = ["."]

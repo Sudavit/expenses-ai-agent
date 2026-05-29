@@ -161,6 +161,17 @@ class TestTypeAliases:
 class TestCurrencyConversion:
     """Tests for the currency conversion utility."""
 
+    def test_convert_currency_same_currency(self):
+        """Converting to the same currency should return the original amount."""
+
+        with patch("tests.unit.test_week2.convert_currency") as mock_convert:
+            mock_convert.return_value = Decimal("50.00")
+
+            result = convert_currency(Decimal("50.00"), "EUR", "EUR")
+
+            assert result == Decimal("50.00")
+            mock_convert.assert_called_once_with(Decimal("50.00"), "EUR", "EUR")
+
     def test_convert_currency_function_exists(self):
         """convert_currency function should exist."""
         assert callable(convert_currency)

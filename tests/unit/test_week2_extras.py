@@ -33,6 +33,13 @@ class TestToolSchemas:
 class TestAPIKeyConfig:
     """Test ability to get API keys"""
 
+    def test_api_keys_accessible(self, monkeypatch):
+        """All secret keys available, non-empty strings"""
+        for api_key in ["EXCHANGE_RATE_API_KEY", "OPENAI_API_KEY"]:
+            monkeypatch.setenv(api_key, "dummy_value_for_unit_test")
+            assert config(api_key, default="")
+            assert isinstance(api_key, str)
+
     def test_bad_api_key_raises(self):
         """Bad secret key raises exception"""
         with pytest.raises(UndefinedValueError):
@@ -40,7 +47,7 @@ class TestAPIKeyConfig:
 
 
 class TestCurrencyExceptions:
-    """Tests for custom currency-conversion exceptions."""
+    """Tests for custom -conversion exceptions."""
 
     def test_expense_not_found_error_exists(self):
         """CurrencyConversionError should be a custom exception."""

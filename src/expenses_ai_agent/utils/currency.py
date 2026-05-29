@@ -5,6 +5,8 @@ from decouple import UndefinedValueError, config
 
 from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
+# this should default to nothing so that in a real run if there is no API key set
+# it will raise an exception.
 EXCHANGE_RATE_API_KEY = config("EXCHANGE_RATE_API_KEY", default="")
 
 

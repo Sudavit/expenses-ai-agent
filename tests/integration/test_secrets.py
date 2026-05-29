@@ -53,7 +53,7 @@ def test_client(mock_expense_repo):
 
 
 @pytest.mark.integration
-class TestSecrets:
+class TestWithTestSecrets:
     def test_convert_currency_same_currency(self):
         """Converting to the same currency should return the original amount."""
         result = convert_currency(Decimal("50.00"), "EUR", "EUR")
@@ -63,8 +63,10 @@ class TestSecrets:
     def test_api_keys_accessible(self):
         """All secret keys available, non-empty strings"""
         for api_key in ["EXCHANGE_RATE_API_KEY", "OPENAI_API_KEY"]:
-            assert config(api_key, default="")
+            assert config(api_key)
             assert isinstance(api_key, str)
+        # EXCHANGE_RATE_API_KEY isn't its default, unit-testing value
+        assert config("EXCHANGE_RATE_API_KEY") != "dummy_value"
 
     def test_bad_currency_conversion_raises(self):
         """Converting to a non-existing currency should raise an exception."""
