@@ -32,8 +32,8 @@ jobs:
       - name: Run Tests with Coverage
         run: uv run pytest --cov=src --cov-fail-under=85 -m 'not integration' # Should be >=95%
         env:
-          # GIST_SECRET: ${{ secrets.GIST_SECRET }}
-          # GIST_ID: ${{ secrets.GIST_ID }}
+          GIST_SECRET: ${{ secrets.GIST_SECRET }}
+          GIST_ID: ${{ secrets.GIST_ID }}
           # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           # EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
         # CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
