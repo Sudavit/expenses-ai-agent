@@ -18,7 +18,7 @@ Requiring these for unit testing or CI/CD is a bad idea for a couple of reasons:
 
 Accordingly the tests are divided into `tests/unit/` and `tests/integration/`. The tests in `tests/unit/` can require no secrets, and can be run with `pytest -m'not integration'`.
 
- Tests in `tests/integration/` are decorated with `@pytest.mark.integration`, and run with `pytest -m integration`. 
+Tests in `tests/integration/` are decorated with `@pytest.mark.integration`, and run with `pytest -m integration`.
 
 If you fork this repository to run the tests yourself, you can run them locally by copying .env-template to .env and filling in your own values for these keys.
 
