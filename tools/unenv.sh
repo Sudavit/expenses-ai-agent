@@ -1,5 +1,3 @@
-#!/bin/bash -eux
-
 # create unset commands for all variables set in .env
 # run it with
 
