@@ -30,18 +30,18 @@ jobs:
           uv sync
 
       - name: Run Tests with Coverage
-        run: uv run pytest --cov=src --cov-fail-under=85 -m 'not integration' # Should be >=95%
+        run: uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=85 -m 'not secrets' # Should be >=95%
         env:
-          GIST_SECRET: ${{ secrets.GIST_SECRET }}
-          GIST_ID: ${{ secrets.GIST_ID }}
-          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
+          # GIST_SECRET: ${{ secrets.GIST_SECRET }}
+          # GIST_ID: ${{ secrets.GIST_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
         # CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         # continue-on-error: false
         # run: |
           # Run tests and pipe to a file
           # the level should be 95% but that's not true yet.
-          # uv run pytest --cov=src --cov-fail-under=85 > pytest_output.txt
+          # uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=85 > pytest_output.txt
           # cat pytest_output.txt
 
           # Improved Extraction: Look for 'TOTAL' and grab the trailing percentage digits
@@ -56,10 +56,11 @@ jobs:
           gistID: ${{ secrets.GIST_ID }}
           filename: expenses_badge.json
           label: Coverage
+          message:
           # Logic: If pytest actually passed AND we have a coverage number, show it.
           # Otherwise, show 'Failing'.
-          message: ${{ (steps.pytest.outcome == 'success' && env.COVERAGE != '') && format('{0}%', env.COVERAGE) || 'Failing' }}
-          color: ${{ steps.pytest.outcome == 'success' && 'brightgreen' || 'red' }}
+          # message: ${{ (steps.pytest.outcome == 'success' && env.COVERAGE != '') && format('{0}%', env.COVERAGE) || 'Failing' }}
+#           color: ${{ steps.pytest.outcome == 'success' && 'brightgreen' || 'red' }}
 
   lint:
     runs-on: ubuntu-latest
@@ -112,8 +113,8 @@ jobs:
       uses: superfly/flyctl-actions@1.4
       with:
         args: "deploy"
-      env:
-        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+#      env:
+#        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
 
       # - name: Update Benchmark Historypytet
