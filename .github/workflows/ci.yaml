@@ -49,6 +49,7 @@ jobs:
           # echo "COVERAGE=$(grep '^TOTAL' pytest_output.txt | awk '{print $NF}' | sed 's/%//')" >> $GITHUB_ENV
 
       - name: Update Gist Badge
+        if: ${{ false }} # Disable badge update for now. There may be a better way to do this, and without the code below it's now failing.
         # if: always()
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
