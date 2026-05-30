@@ -8,7 +8,8 @@ def analyze_gap(file_path="benchmark_history.jsonl"):
 
     # Filter for the most recent runs with 10k samples
     stats = (
-        df.groupby("environment")["duration"]
+        df
+        .groupby("environment")["duration"]
         .agg(["mean", "std", "count"])
         .reset_index()
     )
