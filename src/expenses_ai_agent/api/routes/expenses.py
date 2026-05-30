@@ -45,9 +45,15 @@ def get_one_expense(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseResponse:
+
     try:
         expense = expense_repo.get(expense_id)
     except ExpenseNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Expense with id {expense_id} not found",
+        )
+    if expense is None or expense.telegram_user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Expense with id {expense_id} not found",
@@ -79,6 +85,14 @@ def delete_one_expense(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> None:
+
+    expense = expense_repo.get(expense_id)
+
+    if expense is None or expense.telegram_user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Expense with id {expense_id} not found",
+        )
     try:
         expense_repo.delete(expense_id)
     except ExpenseNotFoundError:
