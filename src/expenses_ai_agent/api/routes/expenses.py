@@ -24,6 +24,10 @@ def list_expenses(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseListResponse:
+    """
+    Returns a paginated list of expenses for the authenticated user;
+    raises 404 if user_id is missing.
+    """
     expenses = expense_repo.list_by_user(user_id)
     start = (page - 1) * page_size
     end = start + page_size
@@ -45,6 +49,10 @@ def get_one_expense(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseResponse:
+    """
+    Retrieves an expense by ID if it belongs to the authenticated user;
+    raises 404 if not found or does not belong to user.
+    """
 
     try:
         expense = expense_repo.get(expense_id)
@@ -62,11 +70,15 @@ def get_one_expense(
 
 
 @router.post("/", response_model=ExpenseResponse, status_code=status.HTTP_201_CREATED)
-def create_expense(
+def persist_expense(
     expense_data: ExpenseResponse,
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseResponse:
+    """
+    Creates a new expense for the authenticated user and returns it;
+    raises 404 if user_id is missing.
+    """
     db_expense = Expense(
         amount=expense_data.amount,
         currency=expense_data.currency,
@@ -85,7 +97,10 @@ def delete_one_expense(
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> None:
-
+    """
+    Deletes an expense by ID if it belongs to the authenticated user;
+    raises 404 if not found or does not belong to user.
+    """
     expense = expense_repo.get(expense_id)
 
     if expense is None or expense.telegram_user_id != user_id:
@@ -107,11 +122,16 @@ def delete_one_expense(
     response_model=ExpenseCategorizationResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def classify(
+def classify_only(
     request: ExpenseClassifyRequest,
     expense_repo: ExpenseRepository = Depends(get_expense_repo),
     user_id: int = Depends(get_user_id),
 ) -> ExpenseCategorizationResponse:
+    """
+    Classifies an expense description using an LLM
+    and returns the categorization result without persisting it.
+    """
+
     model = config("OPENAI_MODEL", default="gpt-4o-mini")
     api_key = config("OPENAI_API_KEY", default="")
 
@@ -135,5 +155,11 @@ POST /expenses/classify — construct an Assistant instance (e.g. OpenAIAssistan
     ClassificationService(assistant=assistant, expense_repo=repo).classify(request.description);
     it returns a ClassificationResult with a .response attribute (ExpenseCategorizationResponse);
     return result.response directly using response_model=ExpenseCategorizationResponse;
-    do not call any repo method here
+    do not call any repo method here.
+    Does not persist the classification result, just returns it.
+POST /expenses  — creates a new expense;
+    call repo.add() with an Expense instance constructed
+    from the request body and user_id;
+    return the created expense as ExpenseResponse
+    using response_model=ExpenseResponse and status code 201
 """  # noqa: E501

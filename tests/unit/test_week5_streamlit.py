@@ -19,10 +19,15 @@ class TestStreamlitAPIClient:
         client = ExpenseAPIClient(base_url="http://test")
         assert hasattr(client, "get_expenses") or hasattr(client, "list_expenses")
 
-    def test_api_client_classify_expense(self):
-        """Client should have method to classify expense."""
+    def test_api_client_classify_only_expense(self):
+        """Client should have method to classify expense, without adding."""
         client = ExpenseAPIClient(base_url="http://test")
-        assert hasattr(client, "classify_expense") or hasattr(client, "classify")
+        assert hasattr(client, "classify_only_expense")
+
+    def test_api_persist_expense(self):
+        """Client should have method to persist expense."""
+        client = ExpenseAPIClient(base_url="http://test")
+        assert hasattr(client, "persist_expense")
 
     def test_api_client_delete_expense(self):
         """Client should have method to delete an expense."""

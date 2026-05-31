@@ -24,6 +24,11 @@ class ClassificationService:
         expense_description: str,
         persist: bool = False,
     ) -> ClassificationResult:
+        """
+        Classifies an expense description and optionally persists the result.
+        Defaults to not persisting to allow for classification
+        without storage side effects.
+        """
         messages = self._build_messages(expense_description)
         response = self.assistant.completion(messages)
 

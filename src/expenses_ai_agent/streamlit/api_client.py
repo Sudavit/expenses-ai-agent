@@ -34,7 +34,9 @@ class ExpenseAPIClient:
             st.error(f"Backend connection failed: {e}")
             return []
 
-    def classify_expense(self, description: str, user_id: int | None = None) -> dict:
+    def classify_only_expense(
+        self, description: str, user_id: int | None = None
+    ) -> dict:
         """
         POST /expenses/classify
         """
@@ -76,7 +78,7 @@ class ExpenseAPIClient:
             st.error(f"Backend connection failed: {e}")
             return {}
 
-    def add_expense(
+    def persist_expense(
         self, description: str, amount: float, user_id: int | None = None
     ) -> None:
         """

@@ -213,7 +213,7 @@ class TestAddExpenseView:
         at.button[0].click().run()
         assert not at.exception
         assert len(at.success) == 1
-        assert "Food" in at.success[0].value
+        assert "Expense added successfully" in at.success[0].value
 
     def test_shows_error_on_connection_failure(self):
         at = _run("""
@@ -221,7 +221,7 @@ class TestAddExpenseView:
             from httpx import RequestError
             from expenses_ai_agent.streamlit.views.add_expense import render
             client = MagicMock()
-            client.classify_expense.side_effect = RequestError("refused")
+            client.classify_only_expense.side_effect = RequestError("refused")
             render(client, user_id=12345)
         """)
         at.text_input[0].input("Coffee at Starbucks")

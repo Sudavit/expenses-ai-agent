@@ -4,7 +4,6 @@ from httpx import RequestError
 from expenses_ai_agent.streamlit.api_client import ExpenseAPIClient
 
 
-# streamlit/views/add_expense.py
 def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
 
     st.header("Add Expense")
@@ -21,7 +20,7 @@ def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
         return
 
     try:
-        classification = client.classify_expense(
+        classification = client.classify_only_expense(
             description=description, user_id=user_id
         )
     except RequestError:
@@ -29,5 +28,7 @@ def render(client: ExpenseAPIClient, user_id: int | None = None) -> None:
         return
 
     amount_value = float(classification["total_amount"])
-    client.add_expense(description=description, amount=amount_value, user_id=user_id)
+    client.persist_expense(
+        description=description, amount=amount_value, user_id=user_id
+    )
     st.success(f"Expense added successfully! Category: {classification['category']}")
