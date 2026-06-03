@@ -42,11 +42,12 @@ class ClassificationService:
         expense_description: str,
         category: ExpenseCategory,
         response: ExpenseCategorizationResponse,
+        telegram_user_id: int | None = None,
     ) -> None:
         response = response.model_copy(update={"category": category})
 
         if self.expense_repo:
-            self._persist_expense(expense_description, response)
+            self._persist_expense(expense_description, response, telegram_user_id)
 
     def _build_messages(self, expense_description: str) -> Messages:
         return [
@@ -58,13 +59,17 @@ class ClassificationService:
         ]
 
     def _persist_expense(
-        self, expense_description: str, response: ExpenseCategorizationResponse
+        self,
+        expense_description: str,
+        response: ExpenseCategorizationResponse,
+        telegram_user_id: int | None = None,
     ) -> None:
         expense = Expense(
             amount=response.total_amount,
             currency=response.currency,
             category=ExpenseCategory(response.category),
             description=expense_description,
+            telegram_user_id=telegram_user_id,
         )
         if self.expense_repo:
             self.expense_repo.add(expense)
