@@ -104,4 +104,6 @@ entrypoint = "src.expenses_ai_agent.api.main:app"
 
 [project.scripts]
 expenses-ai-agent = "expenses_ai_agent.cli.cli:app"
-eaa = "expenses_ai_agent.cli.cli:app"
+eaa = "expenses_ai_agent.cli.cli:app"            # convenient synonym
+expenses-telegram-bot = "expenses_ai_agent.telegram.bot:main"  # add this line
+etb = "expenses_ai_agent.telegram.bot:main"  # add this line
