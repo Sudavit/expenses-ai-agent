@@ -43,4 +43,6 @@ Even if I add the cancel callback VSCode reports a pair of completely mysterious
 
 Nevertheless, the code works.
 
+### Lock it in with tests
 
+All new tests pass, and test coverage is back up to 85%
