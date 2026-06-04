@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-from telegram import Update
+from telegram import CallbackQuery, Update, User
 from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
@@ -41,24 +41,53 @@ HELP_TEXT = (
 )
 
 
+def ensure_message(update: Update):
+    if update.message is None:
+        raise ValueError("Update did not contain a valid message payload.")
+    return update.message
+
+
+def ensure_query(update: Update) -> CallbackQuery:
+    if update.callback_query is None:
+        raise ValueError("Update did not contain a valid callback_query payload.")
+    return update.callback_query
+
+
+def ensure_query_data(query: CallbackQuery) -> str:
+    if query.data is None:
+        raise ValueError("Callback query did not contain valid data.")
+    return query.data
+
+
+def ensure_effective_user(update: Update) -> User:
+    if update.effective_user is None:
+        raise ValueError("Update did not originate from a valid Telegram user.")
+    return update.effective_user
+
+
+def ensure_user_data(context: ContextTypes.DEFAULT_TYPE) -> dict:
+    if context.user_data is None:
+        raise ValueError("User data is required but was not provided.")
+    return context.user_data
+
+
 class ConversationState(IntEnum):
     WAITING_FOR_CATEGORY = 0
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not update.message:
-        return
-    await update.message.reply_text(WELCOME_TEXT)
+    message = ensure_message(update)
+    await message.reply_text(WELCOME_TEXT)
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if not update.message:
-        return
-    await update.message.reply_text(HELP_TEXT)
+    message = ensure_message(update)
+    await message.reply_text(HELP_TEXT)
 
 
 async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.message.reply_text("Operation cancelled.")
+    message = ensure_message(update)
+    await message.reply_text("Operation cancelled.")
     return ConversationHandler.END
 
 
@@ -101,24 +130,27 @@ class ExpenseConversationHandler:
     async def handle_expense_text(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        processed = self._preprocessor.preprocess(update.message.text)
+        message = ensure_message(update)
+        user_data = ensure_user_data(context)
+
+        processed = self._preprocessor.preprocess(message.text)
         if not processed.is_valid:
-            await update.message.reply_text(
+            await message.reply_text(
                 f"Sorry, I couldn't process that: {processed.error}"
             )
             return ConversationHandler.END
         if processed.warnings:
-            await update.message.reply_text("Note: " + "; ".join(processed.warnings))
+            await message.reply_text("Note: " + "; ".join(processed.warnings))
 
         result = self._build_service().classify(processed.text)
-        context.user_data["expense_description"] = processed.text
-        context.user_data["classification_response"] = result.response
+        user_data["expense_description"] = processed.text
+        user_data["classification_response"] = result.response
 
         keyboard = build_category_confirmation_keyboard(
             suggested_category=result.response.category,
             all_categories=self._get_categories(),
         )
-        await update.message.reply_text(
+        await message.reply_text(
             f"Classified as {result.response.category} "
             f"({result.response.confidence:.0%} confidence)\n"
             f"Amount: {result.response.total_amount} {result.response.currency}",
@@ -129,12 +161,20 @@ class ExpenseConversationHandler:
     async def handle_category_selection(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> int:
-        query = update.callback_query
+        query = ensure_query(update)
+        user_data = ensure_user_data(context)
+        effective_user = ensure_effective_user(update)
+        query_data = ensure_query_data(query)
         await query.answer()
-        category = query.data.split(":", 1)[1]
+        category = query_data.split(":", 1)[1]
+        try:
+            category = ExpenseCategory(category)
+        except ValueError:
+            await query.edit_message_text("Error: Invalid expense category received.")
+            return ConversationHandler.END
 
-        description = context.user_data.get("expense_description")
-        response = context.user_data.get("classification_response")
+        description = user_data.get("expense_description")
+        response = user_data.get("classification_response")
         if description is None or response is None:
             await query.edit_message_text("Session expired. Send the expense again.")
             return ConversationHandler.END
@@ -143,7 +183,7 @@ class ExpenseConversationHandler:
             expense_description=description,
             category=category,
             response=response,
-            telegram_user_id=update.effective_user.id,
+            telegram_user_id=effective_user.id,
         )
         await query.edit_message_text(f"Saved as {category}!")
         return ConversationHandler.END
@@ -156,7 +196,8 @@ class CurrencyHandler:
     async def currency_command(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
-        await update.message.reply_text(
+        message = ensure_message(update)
+        await message.reply_text(
             "Select your preferred currency:",
             reply_markup=build_currency_selection_keyboard(),
         )
@@ -164,11 +205,13 @@ class CurrencyHandler:
     async def handle_currency_selection(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
-        query = update.callback_query
+        query = ensure_query(update)
+        effective_user = ensure_effective_user(update)
+        query_data = ensure_query_data(query)
         await query.answer()
-        currency_code = query.data.split(":", 1)[1]
+        currency_code = query_data.split(":", 1)[1]
         DBUserPreferenceRepo(self._db_url).upsert(
-            telegram_user_id=update.effective_user.id,
+            telegram_user_id=effective_user.id,
             currency=Currency(currency_code),
         )
         await query.edit_message_text(f"Currency preference saved as {currency_code}.")
