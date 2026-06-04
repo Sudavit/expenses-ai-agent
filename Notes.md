@@ -29,3 +29,13 @@ I'll stall and look at that problem later.
 #### Wire it and run
 
 Either you mean't "type  **/start**" instead of "tap **Start**" or you forgot to stick in a button.
+
+### Phase3 Harden into a tested Conversation Handler
+
+#### The class
+
+`handlers.py` remains a sea of red
+
+#### `bot.py`
+
+This is now redder, and there is no call to the new `cancel` callback.
