@@ -6,7 +6,7 @@ from telegram.ext import ConversationHandler
 
 from expenses_ai_agent.llms.base import Assistant
 from expenses_ai_agent.llms.output import ExpenseCategorizationResponse
-from expenses_ai_agent.storage.models import Currency
+from expenses_ai_agent.storage.models import Currency, ExpenseCategory
 from expenses_ai_agent.telegram.exceptions import (
     ClassificationError,
     InvalidInputError,
@@ -55,7 +55,7 @@ def mock_callback_update():
 
 def _response() -> ExpenseCategorizationResponse:
     return ExpenseCategorizationResponse(
-        category="Food",
+        category=ExpenseCategory.FOOD,
         total_amount=Decimal("5.50"),
         currency=Currency.USD,
         confidence=0.95,
