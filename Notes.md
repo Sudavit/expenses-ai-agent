@@ -30,7 +30,7 @@ I'll stall and look at that problem later.
 
 Either you mean't "type  **/start**" instead of "tap **Start**" or you forgot to stick in a button.
 
-### Phase3 Harden into a tested Conversation Handler
+### Phase3: Harden into a tested Conversation Handler
 
 #### The class
 
@@ -70,3 +70,15 @@ tests/unit/test_week5_api.py::TestFastAPIApp::test_health_endpoint
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 ```
+### Phase 4: Currency preferences
+
+#### Model and repo
+
+VSCode wants `Field(default_factory=lambda: datetime.now(tz=UTC)`
+instead of `Field(default_factory=lambda: datetime.now(timezone.utc))`
+`storage/repo.py` addition also wants `UTC`
+Both import it as
+`from datetime import UTC`
+
+#### Wire it up
+Still need `cancel_command` in `bot.py`

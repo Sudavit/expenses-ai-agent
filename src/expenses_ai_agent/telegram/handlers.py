@@ -13,11 +13,17 @@ from telegram.ext import (
 from expenses_ai_agent.llms.openai import OpenAIAssistant
 from expenses_ai_agent.services.classification import ClassificationService
 from expenses_ai_agent.services.preprocessing import InputPreprocessor
-from expenses_ai_agent.storage.models import ExpenseCategory
-from expenses_ai_agent.storage.repo import DBExpenseRepository as DBExpenseRepo
+from expenses_ai_agent.storage.models import Currency, ExpenseCategory
+from expenses_ai_agent.storage.repo import (
+    DBExpenseRepository as DBExpenseRepo,
+)
+from expenses_ai_agent.storage.repo import (
+    DBUserPreferenceRepo,
+)
 from expenses_ai_agent.telegram.keyboards import (
     CATEGORY_CALLBACK_PREFIX,
     build_category_confirmation_keyboard,
+    build_currency_selection_keyboard,
 )
 
 WELCOME_TEXT = (
@@ -28,7 +34,9 @@ WELCOME_TEXT = (
 
 HELP_TEXT = (
     "/start — welcome message\n"
-    "/help — this message\n\n"
+    "/help — this message\n"
+    "/currency — set your preferred currency\n"
+    "/cancel — cancel the current operation\n\n"
     "Or just send any expense description to classify it."
 )
 
@@ -139,3 +147,28 @@ class ExpenseConversationHandler:
         )
         await query.edit_message_text(f"Saved as {category}!")
         return ConversationHandler.END
+
+
+class CurrencyHandler:
+    def __init__(self, db_url: str):
+        self._db_url = db_url
+
+    async def currency_command(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        await update.message.reply_text(
+            "Select your preferred currency:",
+            reply_markup=build_currency_selection_keyboard(),
+        )
+
+    async def handle_currency_selection(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> None:
+        query = update.callback_query
+        await query.answer()
+        currency_code = query.data.split(":", 1)[1]
+        DBUserPreferenceRepo(self._db_url).upsert(
+            telegram_user_id=update.effective_user.id,
+            currency=Currency(currency_code),
+        )
+        await query.edit_message_text(f"Currency preference saved as {currency_code}.")

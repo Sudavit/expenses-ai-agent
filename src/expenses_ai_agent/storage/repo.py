@@ -1,13 +1,18 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from types import TracebackType
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
-from expenses_ai_agent.storage.models import Expense, ExpenseCategory
+from expenses_ai_agent.storage.models import (
+    Currency,
+    Expense,
+    ExpenseCategory,
+    UserPreference,
+)
 
 DUMMY_CATEGORY_TOTALS = {str(category): Decimal("69.0") for category in ExpenseCategory}
 
@@ -269,3 +274,34 @@ class DBExpenseRepository(ExpenseRepository[Expense]):
                 category = expense.category
                 category_totals[category] += expense.amount
         return category_totals
+
+
+class DBUserPreferenceRepo:
+    def __init__(self, db_url: str, session: Session | None = None):
+        if session is None:
+            engine = create_engine(db_url)
+            SQLModel.metadata.create_all(engine)
+            self.db = Session(engine)
+        else:
+            self.db = session
+
+    def get_by_user_id(self, telegram_user_id: int) -> UserPreference | None:
+        return self.db.exec(
+            select(UserPreference).where(
+                UserPreference.telegram_user_id == telegram_user_id
+            )
+        ).first()
+
+    def upsert(self, telegram_user_id: int, currency: Currency) -> UserPreference:
+        pref = self.get_by_user_id(telegram_user_id)
+        if pref is None:
+            pref = UserPreference(
+                telegram_user_id=telegram_user_id, preferred_currency=currency
+            )
+            self.db.add(pref)
+        else:
+            pref.preferred_currency = currency
+            pref.updated_at = datetime.now(UTC)
+        self.db.commit()
+        self.db.refresh(pref)
+        return pref
