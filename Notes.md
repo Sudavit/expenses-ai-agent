@@ -45,4 +45,28 @@ Nevertheless, the code works.
 
 ### Lock it in with tests
 
-All new tests pass, and test coverage is back up to 85%
+All new tests pass, and test coverage is back up to 84%.
+
+Four warnings in unit tests:
+
+```
+=============================================================== warnings summary ===============================================================
+tests/unit/test_week4_handlers.py::TestExpenseConversationHandler::test_build_returns_conversation_handler
+tests/unit/test_week4_handlers.py::TestExpenseConversationHandler::test_build_routes_category_taps_with_correct_pattern
+  /Users/jsh/Projects/AAI/expenses-ai-agent/src/expenses_ai_agent/telegram/handlers.py:76: PTBUserWarning: If 'per_message=False', 'CallbackQueryHandler' will not be tracked for every message. Read this FAQ entry to learn more about the per_* settings: https://github.com/python-telegram-bot/python-telegram-bot/wiki/Frequently-Asked-Questions#what-do-the-per_-settings-in-conversationhandler-do.
+    return ConversationHandler(
+
+tests/unit/test_week4_handlers.py::TestExpenseConversationHandler::test_telegram_user_id_forwarded
+  /Users/jsh/.local/share/uv/python/cpython-3.13.5-macos-aarch64-none/lib/python3.13/unittest/mock.py:2247: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x10cf6de40>
+    def __init__(self, name, parent):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_week5_api.py::TestFastAPIApp::test_health_endpoint
+  /Users/jsh/.local/share/uv/python/cpython-3.13.5-macos-aarch64-none/lib/python3.13/contextlib.py:108: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x10d2405e0>
+    def __init__(self, func, args, kwds):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+```
