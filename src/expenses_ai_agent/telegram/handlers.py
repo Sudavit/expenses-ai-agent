@@ -1,9 +1,24 @@
-from telegram import Update
-from telegram.ext import ContextTypes
+from enum import IntEnum
 
+from telegram import Update
+from telegram.ext import (
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
+
+from expenses_ai_agent.llms.openai import OpenAIAssistant
+from expenses_ai_agent.services.classification import ClassificationService
 from expenses_ai_agent.services.preprocessing import InputPreprocessor
 from expenses_ai_agent.storage.models import ExpenseCategory
-from expenses_ai_agent.telegram.keyboards import build_category_confirmation_keyboard
+from expenses_ai_agent.storage.repo import DBExpenseRepository as DBExpenseRepo
+from expenses_ai_agent.telegram.keyboards import (
+    CATEGORY_CALLBACK_PREFIX,
+    build_category_confirmation_keyboard,
+)
 
 WELCOME_TEXT = (
     "Welcome! Send me an expense and I'll classify it.\n"
@@ -18,6 +33,10 @@ HELP_TEXT = (
 )
 
 
+class ConversationState(IntEnum):
+    WAITING_FOR_CATEGORY = 0
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
@@ -30,76 +49,93 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text(HELP_TEXT)
 
 
-_preprocessor = InputPreprocessor()
+async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text("Operation cancelled.")
+    return ConversationHandler.END
 
 
-async def handle_expense_text(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+class ExpenseConversationHandler:
+    def __init__(self, db_url: str, api_key: str, model: str = "gpt-4o-mini"):
+        self._db_url = db_url
+        self._api_key = api_key
+        self._model = model
+        self._preprocessor = InputPreprocessor()
 
-    message = update.message
-    if not message or not message.text:
-        return
+    def _build_assistant(self) -> OpenAIAssistant:
+        return OpenAIAssistant(api_key=self._api_key, model=self._model)
 
-    processed = _preprocessor.preprocess(message.text)
-    if not processed.is_valid:
-        await update.message.reply_text(
-            f"Sorry, I couldn't process that: {processed.error}"
+    def _build_service(self) -> ClassificationService:
+        return ClassificationService(
+            self._build_assistant(), DBExpenseRepo(self._db_url)
         )
-        return
-    if processed.warnings:
-        await update.message.reply_text("Note: " + "; ".join(processed.warnings))
 
-    service = context.bot_data["service"]
-    text = update.message.text if update.message else ""
-    result = service.classify(processed.text)
+    def _get_categories(self) -> list[str]:
+        return [c.value for c in ExpenseCategory]
 
-    assert context.user_data is not None  # for type checker
-    context.user_data["expense_description"] = text
-    context.user_data["classification_response"] = result.response
+    def build(self) -> ConversationHandler:
+        return ConversationHandler(
+            entry_points=[
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, self.handle_expense_text
+                )
+            ],
+            states={
+                ConversationState.WAITING_FOR_CATEGORY: [
+                    CallbackQueryHandler(
+                        self.handle_category_selection,
+                        pattern=f"^{CATEGORY_CALLBACK_PREFIX}",
+                    )
+                ],
+            },
+            fallbacks=[CommandHandler("cancel", cancel_command)],
+        )
 
-    keyboard = build_category_confirmation_keyboard(
-        suggested_category=result.response.category,
-        all_categories=[c.value for c in ExpenseCategory],
-    )
+    async def handle_expense_text(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> int:
+        processed = self._preprocessor.preprocess(update.message.text)
+        if not processed.is_valid:
+            await update.message.reply_text(
+                f"Sorry, I couldn't process that: {processed.error}"
+            )
+            return ConversationHandler.END
+        if processed.warnings:
+            await update.message.reply_text("Note: " + "; ".join(processed.warnings))
 
-    await update.message.reply_text(
-        f"Classified as {result.response.category} "
-        f"({result.response.confidence:.0%} confidence)\n"
-        f"Amount: {result.response.total_amount} {result.response.currency}",
-        reply_markup=keyboard,
-    )
+        result = self._build_service().classify(processed.text)
+        context.user_data["expense_description"] = processed.text
+        context.user_data["classification_response"] = result.response
 
+        keyboard = build_category_confirmation_keyboard(
+            suggested_category=result.response.category,
+            all_categories=self._get_categories(),
+        )
+        await update.message.reply_text(
+            f"Classified as {result.response.category} "
+            f"({result.response.confidence:.0%} confidence)\n"
+            f"Amount: {result.response.total_amount} {result.response.currency}",
+            reply_markup=keyboard,
+        )
+        return ConversationState.WAITING_FOR_CATEGORY
 
-async def handle_category_selection(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    query = update.callback_query
-    telegram_user_id = update.effective_user.id if update.effective_user else None
+    async def handle_category_selection(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> int:
+        query = update.callback_query
+        await query.answer()
+        category = query.data.split(":", 1)[1]
 
-    if not query or not telegram_user_id:
-        return
+        description = context.user_data.get("expense_description")
+        response = context.user_data.get("classification_response")
+        if description is None or response is None:
+            await query.edit_message_text("Session expired. Send the expense again.")
+            return ConversationHandler.END
 
-    await query.answer()  # stop the spinner first, always
-    if not query.data:
-        return
-    category = query.data.split(":", 1)[1]  # "category:Food" -> "Food"
-
-    if not context.user_data:
-        await query.edit_message_text("Session expired. Send the expense again.")
-        return
-
-    description = context.user_data.get("expense_description")
-    response = context.user_data.get("classification_response")
-    if description is None or response is None:
-        await query.edit_message_text("Session expired. Send the expense again.")
-        return
-
-    service = context.bot_data["service"]
-    service.persist_with_category(
-        expense_description=description,
-        category_name=category,
-        response=response,
-        telegram_user_id=telegram_user_id,
-    )
-    await query.edit_message_text(f"Saved as {category}!")
+        self._build_service().persist_with_category(
+            expense_description=description,
+            category=category,
+            response=response,
+            telegram_user_id=update.effective_user.id,
+        )
+        await query.edit_message_text(f"Saved as {category}!")
+        return ConversationHandler.END
