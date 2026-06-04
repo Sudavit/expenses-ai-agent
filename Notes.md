@@ -38,4 +38,9 @@ Either you mean't "type  **/start**" instead of "tap **Start**" or you forgot to
 
 #### `bot.py`
 
-This is now redder, and there is no call to the new `cancel` callback.
+This is now a bit red in VSCode, and there is no call to the new `cancel` callback.
+Even if I add the cancel callback VSCode reports a pair of completely mysterious errors in lines that make no sense.
+
+Nevertheless, the code works.
+
+
