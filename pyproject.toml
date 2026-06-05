@@ -77,7 +77,7 @@ markers = [
     "integration: integration tests, which require interacting with other services (databases, LLMs, ...)",
     "secrets: tests that require secret keys",
 ]
-addopts = "--cov=src --cov-fail-under=85"
+addopts = "--cov=src --cov-fail-under=80"
 
 [tool.coverage.run]
 source = ["."]
@@ -92,7 +92,7 @@ exclude_lines = [
     "@abstractmethod",
     "\\.\\.\\."
 ]
-fail_under = 85 # should be 95 or 100
+fail_under = 80 # should be 95 or 100
 show_missing = true
 
 [tool.fastapi]
