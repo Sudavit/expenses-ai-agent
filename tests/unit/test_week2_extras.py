@@ -22,6 +22,7 @@ from expenses_ai_agent.utils.date_formatter import format_datetime
 from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
 
+
 class TestDateFormatter:
     """Tests for the date formatting utility."""
 
@@ -105,6 +106,42 @@ class TestLLMExceptions:
             assistant.completion(messages=[{"role": "user", "content": "test"}])
             
         assert "Failed to parse response from OpenAI" in str(exc_info.value)
+
+
+    @patch("expenses_ai_agent.llms.openai.OpenAI")
+    def test_get_available_models_returns_sequence_of_ids(self,mock_openai_class):
+        """Should successfully fetch and extract model IDs from the client listing."""
+        # 1. Access the mock instance returned by the class constructor
+        mock_client = mock_openai_class.return_value
+        
+        # 2. Forge individual model objects containing an 'id' attribute
+        mock_model_1 = MagicMock()
+        mock_model_1.id = "jeff"
+        
+        mock_model_2 = MagicMock()
+        mock_model_2.id = "juanjo"
+
+        mock_model_3 = MagicMock()
+        mock_model_3.id = "bob"
+        
+        # 3. Attach the mocked list to the models endpoint tree
+        mock_client.models.list.return_value = [
+            mock_model_1, 
+            mock_model_2, 
+            mock_model_3
+        ]
+        
+        # 4. Instantiate our assistant and execute the target method
+        assistant = OpenAIAssistant(api_key="valid-mock-key")
+        models = assistant.get_available_models()
+        
+        # 5. Validation Assertions
+        assert len(models) == 3
+        assert "jeff" in models
+        assert "juanjo" in models
+        assert "bob" in models
+        # Structural Check: Ensure the underlying client method was explicitly invoked
+        mock_client.models.list.assert_called_once()
 
 class TestExpenseSchemasEdgeCases:
     """Extra validations to force absolute schema coverage."""
