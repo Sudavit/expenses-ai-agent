@@ -1,7 +1,9 @@
 import pytest
 from decouple import UndefinedValueError, config
 from jsonschema import validate
+from pydantic import ValidationError
 
+from expenses_ai_agent.api.schemas.expense import ExpenseClassifyRequest
 from expenses_ai_agent.llms.exceptions import LLMParseError
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
@@ -64,3 +66,17 @@ class TestLLMExceptions:
         error = LLMParseError("This is an LLM parsing error")
         assert isinstance(error, Exception)
         assert "LLM parsing" in str(error)
+
+
+class TestExpenseSchemasEdgeCases:
+    """Extra validations to force absolute schema coverage."""
+
+    def test_expense_classify_request_whitespace_only_raises_error(self):
+        """Should fail validation when description contains only whitespace."""
+
+        # Pydantic will intercept the ValueError and wrap it inside a ValidationError
+        with pytest.raises(ValidationError) as exc_info:
+            ExpenseClassifyRequest(description="   ")
+
+        # Verify that our specific exception message survived the Pydantic wrapper
+        assert "description cannot be empty or whitespace" in str(exc_info.value)
