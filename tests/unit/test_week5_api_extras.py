@@ -15,6 +15,8 @@ from expenses_ai_agent.api.deps import (
     get_user_id,
 )
 from expenses_ai_agent.api.routes.expenses import router
+from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
+from expenses_ai_agent.storage.models import Currency, Expense
 from expenses_ai_agent.storage.repo import DBExpenseRepository
 
 app = FastAPI()
@@ -145,3 +147,46 @@ class TestCategoryRoutesCreation:
         instantiated_expense = mock_repo.add.call_args[0][0]
         assert instantiated_expense.amount == Decimal("45.50")
         assert instantiated_expense.telegram_user_id == 12345
+
+
+class TestCategoryRoutesDeletion:
+    def test_delete_one_expense_race_condition_not_found_raises_404(self):
+        """
+        Error Path: Triggers the terminal except block
+        when a record disappears mid-deletion.
+        """
+        # 1. Setup a controlled mock repository layer
+        mock_repo = MagicMock()
+
+        # 2. Stage step one:
+        # Return a valid matching expense model shell to pass ownership verification
+        valid_expense_shell = Expense(
+            id=777, amount=Decimal(10.00), currency=Currency.EUR, telegram_user_id=12345
+        )
+        mock_repo.get.return_value = valid_expense_shell
+
+        # 3. Stage step two: Force .delete()
+        # to simulate a database miss via Exception raising
+        mock_repo.delete.side_effect = ExpenseNotFoundError(expense_id=777)
+
+        # 4. Bind the mock implementations to our FastAPI dependencies
+        app.dependency_overrides[get_expense_repo] = lambda: mock_repo
+        app.dependency_overrides[get_user_id] = lambda: 12345
+
+        # 5. Fire the transaction directly into the delete endpoint
+        response = client.delete("/expenses/777")
+
+        # 6. Tear down dependency overrides immediately
+        app.dependency_overrides.clear()
+
+        # ==========================================
+        # VERIFICATION MATRICES
+        # ==========================================
+        # Confirm that the application caught our backend exception
+        # and mapped it to an HTTP 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert "Expense with id 777 not found" in response.json()["detail"]
+
+        # Ensure both methods were executed in sequence
+        mock_repo.get.assert_called_once_with(777)
+        mock_repo.delete.assert_called_once_with(777)
