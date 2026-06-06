@@ -47,7 +47,7 @@ def main() -> None:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         level=logging.INFO,
     )
-    token = config("TELEGRAM_BOT_TOKEN")
+    token = config("TELEGRAM_BOT_TOKEN", default="")
     db_url = config("DATABASE_URL", default="sqlite:///./expenses.db")
     api_key = config("OPENAI_API_KEY")
 
