@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from decouple import UndefinedValueError
@@ -10,6 +10,7 @@ from expenses_ai_agent.storage.repo import (
     InMemoryExpenseRepository,
 )
 from expenses_ai_agent.utils.currency import convert_currency
+from expenses_ai_agent.utils.exceptions import CurrencyConversionError
 
 BAD_ID = 999
 
@@ -81,3 +82,33 @@ class TestCurrencyEdgeCases:
 
             # Financial Accuracy Check: Validate the error string matches expectations
             assert "EXCHANGE_RATE_API_KEY must be set" in str(exc_info.value)
+
+    def test_convert_currency_identical_currencies_returns_amount_immediately(self):
+        """
+        Happy Path (Line 26): Should immediately return the amount
+        without API or key checks.
+        """
+        original_amount = Decimal("150.75")
+
+        # Passing matching currencies should trigger the early exit branch
+        result = convert_currency(original_amount, "EUR", "EUR")
+
+        # Assert structural precision
+        assert result == original_amount
+
+    @patch("expenses_ai_agent.utils.currency.requests.get", spec=True)
+    @patch("expenses_ai_agent.utils.currency.EXCHANGE_RATE_API_KEY", "mock-active-key")
+    def test_convert_currency_api_failure_raises_custom_error(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "result": "error",
+            "error-type": "invalid-key",
+        }
+        mock_get.return_value = mock_response
+
+        with pytest.raises(CurrencyConversionError):
+            convert_currency(Decimal("100.00"), "USD", "EUR")
+
+        mock_get.assert_called_once_with(
+            "https://v6.exchangerate-api.com/v6/mock-active-key/pair/USD/EUR"
+        )
