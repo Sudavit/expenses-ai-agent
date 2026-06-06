@@ -1,10 +1,8 @@
 from decimal import Decimal
-
 from unittest.mock import patch
-from decimal import Decimal
+
 import pytest
 from decouple import UndefinedValueError
-
 
 from expenses_ai_agent.storage.exceptions import ExpenseNotFoundError
 from expenses_ai_agent.storage.models import Currency, Expense
@@ -67,18 +65,19 @@ class TestInMemoryExpenseRepositoryExtras:
     def test_get_nonexistent_returns_none(self, repo):
         assert repo.get(BAD_ID) is None
 
+
 class TestCurrencyEdgeCases:
     """Extra coverage validations for financial utilities."""
 
     def test_convert_currency_missing_api_key_raises_error(self):
         """Should raise UndefinedValueError if EXCHANGE_RATE_API_KEY is blank."""
-        
+
         # We target the global variable inside the module where it is defined
         target_path = "expenses_ai_agent.utils.currency.EXCHANGE_RATE_API_KEY"
-        
+
         with patch(target_path, ""):
             with pytest.raises(UndefinedValueError) as exc_info:
                 convert_currency(Decimal("10.00"), "USD", "EUR")
-                
+
             # Financial Accuracy Check: Validate the error string matches expectations
             assert "EXCHANGE_RATE_API_KEY must be set" in str(exc_info.value)

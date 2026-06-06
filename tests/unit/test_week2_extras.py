@@ -1,18 +1,16 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from decouple import UndefinedValueError, config
 from jsonschema import validate
 from pydantic import ValidationError
-from unittest.mock import MagicMock, patch
-
 
 from expenses_ai_agent.api.schemas.expense import ExpenseClassifyRequest
-from expenses_ai_agent.llms.openai import OpenAIAssistant
 from expenses_ai_agent.llms.exceptions import (
-    LLMParseError,
     LLMNoKeyError,
+    LLMParseError,
 )
-
-
+from expenses_ai_agent.llms.openai import OpenAIAssistant
 from expenses_ai_agent.tools.tools import (
     CURRENCY_CONVERSION_TOOL,
     DATETIME_FORMATTER_TOOL,
@@ -20,7 +18,6 @@ from expenses_ai_agent.tools.tools import (
 )
 from expenses_ai_agent.utils.date_formatter import format_datetime
 from expenses_ai_agent.utils.exceptions import CurrencyConversionError
-
 
 
 class TestDateFormatter:
@@ -76,65 +73,68 @@ class TestLLMExceptions:
         assert isinstance(error, Exception)
         assert "LLM parsing" in str(error)
 
-
     def test_openai_assistant_missing_key_raises_error(self):
         """Should raise LLMNoKeyError if no API key is found in env or arguments."""
         # We patch decouple.config inside the openai module to return an empty string
         with patch("expenses_ai_agent.llms.openai.config", return_value=""):
             with pytest.raises(LLMNoKeyError) as exc_info:
                 OpenAIAssistant(api_key=None)
-                
-            assert "set $OPENAI_API_KEY or pass in to OpenAIAssistant()" in str(exc_info.value)
 
-
+            assert "set $OPENAI_API_KEY or pass in to OpenAIAssistant()" in str(
+                exc_info.value
+            )
 
     @patch("expenses_ai_agent.llms.openai.OpenAI")
-    def test_openai_assistant_completion_parse_failure_raises_error(self, mock_openai_class):
-        """Should raise LLMParseError if the response parsed attribute evaluates to None."""
+    def test_openai_assistant_completion_parse_failure_raises_error(
+        self, mock_openai_class
+    ):
+        """
+        Should raise LLMParseError
+        if the response parsed attribute evaluates to None.
+        """
         # Mock the internal client and beta completion endpoint
         mock_client = mock_openai_class.return_value
         mock_response = MagicMock()
-        
+
         # Force the parsed field to be None to simulate validation failure
         mock_response.choices[0].message.parsed = None
         mock_client.beta.chat.completions.parse.return_value = mock_response
-        
+
         # Initialize assistant with a dummy key to bypass the init check
         assistant = OpenAIAssistant(api_key="fake-key")
-        
+
         with pytest.raises(LLMParseError) as exc_info:
             assistant.completion(messages=[{"role": "user", "content": "test"}])
-            
+
         assert "Failed to parse response from OpenAI" in str(exc_info.value)
 
-
     @patch("expenses_ai_agent.llms.openai.OpenAI")
-    def test_get_available_models_returns_sequence_of_ids(self,mock_openai_class):
+    def test_get_available_models_returns_sequence_of_ids(self, mock_openai_class):
         """Should successfully fetch and extract model IDs from the client listing."""
         # 1. Access the mock instance returned by the class constructor
         mock_client = mock_openai_class.return_value
-        
+
         # 2. Forge individual model objects containing an 'id' attribute
         mock_model_1 = MagicMock()
         mock_model_1.id = "jeff"
-        
+
         mock_model_2 = MagicMock()
         mock_model_2.id = "juanjo"
 
         mock_model_3 = MagicMock()
         mock_model_3.id = "bob"
-        
+
         # 3. Attach the mocked list to the models endpoint tree
         mock_client.models.list.return_value = [
-            mock_model_1, 
-            mock_model_2, 
-            mock_model_3
+            mock_model_1,
+            mock_model_2,
+            mock_model_3,
         ]
-        
+
         # 4. Instantiate our assistant and execute the target method
         assistant = OpenAIAssistant(api_key="valid-mock-key")
         models = assistant.get_available_models()
-        
+
         # 5. Validation Assertions
         assert len(models) == 3
         assert "jeff" in models
@@ -142,6 +142,7 @@ class TestLLMExceptions:
         assert "bob" in models
         # Structural Check: Ensure the underlying client method was explicitly invoked
         mock_client.models.list.assert_called_once()
+
 
 class TestExpenseSchemasEdgeCases:
     """Extra validations to force absolute schema coverage."""
@@ -155,4 +156,3 @@ class TestExpenseSchemasEdgeCases:
 
         # Verify that our specific exception message survived the Pydantic wrapper
         assert "description cannot be empty or whitespace" in str(exc_info.value)
-
