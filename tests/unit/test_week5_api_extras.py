@@ -1,6 +1,10 @@
+from datetime import UTC, datetime
+from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import FastAPI, status
+from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from expenses_ai_agent.api.deps import (
@@ -10,7 +14,12 @@ from expenses_ai_agent.api.deps import (
     get_expense_repo,
     get_user_id,
 )
+from expenses_ai_agent.api.routes.expenses import router
 from expenses_ai_agent.storage.repo import DBExpenseRepository
+
+app = FastAPI()
+app.include_router(router)
+client = TestClient(app)
 
 
 class TestApiDependenciesExhaustive:
@@ -79,3 +88,60 @@ class TestApiDependenciesExhaustive:
         """Branch 3: Should return the static DUMMY_ID if both inputs are missing."""
         result = get_user_id(x_user_id=None, user_id=None)
         assert result == DUMMY_ID
+
+
+class TestCategoryRoutesCreation:
+    def test_persist_expense_executes_creation_block_flawlessly(self):
+        """
+        Happy Path: Verifies the raw data instantiation,
+        repository addition, and return serialization.
+        """
+        # 1. Setup a controlled mock repository layer
+        mock_repo = MagicMock()
+
+        # 2. Forge dependency overrides
+        # to supply our mock repository and a fixed test user ID
+        app.dependency_overrides[get_expense_repo] = lambda: mock_repo
+        app.dependency_overrides[get_user_id] = lambda: 12345
+
+        # 3. Build a precise incoming data payload
+        # matching the ExpenseResponse/Schema expectations
+        test_payload = {
+            "id": None,
+            "category": "Food",
+            "amount": "45.50",
+            "currency": "EUR",
+            "date": datetime.now(UTC).isoformat(),
+            "description": "Team lunch validation",
+            "telegram_user_id": None,
+        }
+
+        # 4. Fire the request directly into the endpoint
+        response = client.post("/expenses/", json=test_payload)
+
+        # 5. Clean up dependencies immediately
+        app.dependency_overrides.clear()
+
+        # ==========================================
+        # VERIFICATION MATRICES
+        # ==========================================
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Validate the server accurately serialized
+        # and return  the record attributes
+        data = response.json()
+        assert data["amount"] == "45.50"
+        assert data["category"] == "Food"
+        assert (
+            data["telegram_user_id"] == 12345
+        )  # Must override to the resolved route user ID
+
+        # Structural Integrity Verification:
+        # Confirm repo.add() was explicitly invoked
+        mock_repo.add.assert_called_once()
+
+        # Extract the internal instance passed into repo.add()
+        # to verify its field components
+        instantiated_expense = mock_repo.add.call_args[0][0]
+        assert instantiated_expense.amount == Decimal("45.50")
+        assert instantiated_expense.telegram_user_id == 12345
