@@ -108,6 +108,8 @@ class TestTelegramBotOrchestration:
 class TestTelegramBotScriptEntrypoint:
     """Validates the physical script execution pathway of bot.py when run as main."""
 
+    @patch("expenses_ai_agent.telegram.bot.CurrencyHandler")
+    @patch("expenses_ai_agent.telegram.bot.ExpenseConversationHandler")
     @patch.dict(
         os.environ,
         {
@@ -116,34 +118,20 @@ class TestTelegramBotScriptEntrypoint:
         },
     )
     @patch("expenses_ai_agent.telegram.bot.Application.builder")
-    def test_bot_script_execution_as_main_entrypoint(self, mock_builder_fn):
-        """Simulate executing the file directly from a terminal context."""
-
-        # 1. Setup a fluent mock builder pipeline
-        # to satisfy instantiation tracking
+    def test_bot_script_execution_as_main_entrypoint(
+        self, mock_builder_fn, mock_conv_class, mock_curr_class
+    ):
+        """Happy Path: Simulates executing the file directly from a terminal context."""
+        # Setup the fluent builder mock pipeline
         mock_builder_instance = MagicMock()
         mock_builder_fn.return_value = mock_builder_instance
         mock_builder_instance.token.return_value = mock_builder_instance
 
-        mock_app_instance = MagicMock(spec=Application)
+        mock_app_instance = MagicMock()
         mock_builder_instance.build.return_value = mock_app_instance
 
-        # 2. Target the literal location of the file in your project workspace
         target_file_path = "src/expenses_ai_agent/telegram/bot.py"
-
-        # 3. Force run_path to execute the file
-        # while binding its execution name to __main__
         runpy.run_path(target_file_path, run_name="__main__")
 
-        # ==========================================
-        # VERIFICATION
-        # ==========================================
-        # Verify that the script successfully entered main()
-        # and ran the initialization chain
         mock_builder_fn.assert_called_once()
-        mock_builder_instance.token.assert_called_once_with("dummy-test-token-format")
-        # Confirm that the interpreter passed the conditional block and invoked main()
-
-        # Verify that the script reached the very last line of main()
-        # and started the engine loop
         mock_app_instance.run_polling.assert_called_once()

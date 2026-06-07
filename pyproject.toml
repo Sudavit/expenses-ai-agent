@@ -70,6 +70,7 @@ respect-type-ignore-comments = true
 pythonpath = ["src"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+filterwarnings = "ignore:.*tracked for every message.*:UserWarning"
 env = [
     "D:EXCHANGE_RATE_API_KEY=dummy_value",  # for unit testing
 ]

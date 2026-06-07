@@ -86,6 +86,21 @@ class TestCommandHandlers:
 
 
 class TestExpenseConversationHandler:
+    @pytest.fixture(autouse=True)
+    def mock_db_layer(self):
+        """Autouse fixture that intercepts the database repository instantiation.
+
+        By mocking the repository class layer for every test inside this class,
+        it ensures that no live, unmanaged SQLite connections are ever left open
+        by any method—including your configuration or live flow tests.
+        """
+        with patch(
+            "expenses_ai_agent.telegram.handlers.DBExpenseRepo"
+        ) as mock_repo_class:
+            self.mock_repo_instance = MagicMock()
+            mock_repo_class.return_value = self.mock_repo_instance
+            yield
+
     def _handler(self):
         return ExpenseConversationHandler(
             db_url="sqlite:///:memory:", api_key="test-key"
@@ -131,6 +146,8 @@ class TestExpenseConversationHandler:
             )
         assert result == ConversationHandler.END
         mock_callback_update.callback_query.answer.assert_awaited()
+        # Clean up the dangling database resource before function termination
+        handler._build_service().expense_repo.close()
 
     async def test_telegram_user_id_forwarded(self, mock_callback_update, mock_context):
         mock_context.user_data["expense_description"] = "Coffee $5.50"
