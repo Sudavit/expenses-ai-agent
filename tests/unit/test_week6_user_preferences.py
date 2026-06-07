@@ -1,19 +1,20 @@
-from sqlmodel import create_engine, Session, SQLModel
-from expenses_ai_agent.storage.models import Currency, UserPreference
+from sqlmodel import Session, SQLModel, create_engine
+
+from expenses_ai_agent.storage.models import Currency
 from expenses_ai_agent.storage.repo import DBUserPreferenceRepo
 
 
 class TestDBUserPreferenceRepo:
-    """Targeted validation suite to guarantee 100% full coverage across DBUserPreferenceRepo."""
+    """Test DBUserPreferenceRepo."""
 
     def test_user_preference_lifecycle_inserts_and_updates_successfully(self):
-        """Test initialization, get_by_user_id, and both branches of the upsert operation."""
+        """Test initialization, get_by_user_id, both branches of the upsert operation"""
         # 1. Spin up an isolated, structural memory sandbox engine
         engine = create_engine("sqlite:///:memory:")
         SQLModel.metadata.create_all(engine)
 
         with Session(engine) as session:
-            # 2. Instantiate our repo layer injecting our shared active transaction channel
+            # 2. Instantiate repo layer injecting shared active transaction channel
             repo = DBUserPreferenceRepo(db_url="sqlite:///:memory:", session=session)
             test_user_id = 444555
 
@@ -54,10 +55,10 @@ class TestDBUserPreferenceRepo:
             assert final_lookup.preferred_currency == Currency.USD
 
     def test_constructor_initialization_without_managed_session(self):
-        """Happy Path: Exercises the session=None branch of the constructor initialization process."""
+        """Test session=None branch of the constructor initialization process."""
         # This executes the inner conditional lines 3-6 of the class setup layout
         repo = DBUserPreferenceRepo(db_url="sqlite:///:memory:")
         assert repo.db is not None
 
-        # Explicit session resource release management safely following validation tracking
+        # Session resource release management safely following validation tracking
         repo.db.close()
