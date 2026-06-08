@@ -1,9 +1,8 @@
 # Expenses AI Agent 🤖💼
 
-```
+
 ![GitHub Release](https://img.shields.io/github/v/tag/Sudavit/expenses-ai-agent)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jsh/trendlist/blob/master/LICENSE)
-![Pytest Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/jsh/adf6157270f535d96810040c16f44a3f/raw/expenses_badge.json)
 
 An elegant, production-grade AI-powered expense tracking assistant built with modern Python tools. The agent parses unstructured text inputs (e.g., *"Coffee at Starbucks $5.50"*), uses a Large Language Model (LLM) to intelligently classify categories, evaluate confidence levels, normalize currencies, and securely persists the structured data.
 
@@ -161,7 +160,7 @@ If you fork this repository and wish to run automated execution flows against ac
 env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
-```
+
 
 ---
 
