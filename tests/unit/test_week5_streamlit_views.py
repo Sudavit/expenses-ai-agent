@@ -10,7 +10,10 @@ except ImportError:
 
 
 def _run(script: str, timeout: float = 20.0) -> AppTest:
-    """Run Streamlit string script with an extended timeout to handle cold environments."""
+    """
+    Run Streamlit string script with an extended timeout
+    to handle cold environments.
+    """
     return AppTest.from_string(dedent(script), default_timeout=timeout).run()
 
 

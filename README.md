@@ -141,7 +141,7 @@ uv run pytest
 
 ## 🔄 CI/CD Pipeline
 
-Continuous Integration and Delivery are managed natively inside GitHub Actions (`.github/workflows/ci.yaml`). 
+Continuous Integration and Delivery are managed natively inside GitHub Actions (`.github/workflows/ci.yaml`).
 
 ### Running Unit Testing on GitHub Actions
 These should just run and succeed, as-is.
