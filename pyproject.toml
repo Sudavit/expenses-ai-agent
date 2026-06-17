@@ -78,7 +78,7 @@ markers = [
     "integration: integration tests, which require interacting with other services (databases, LLMs, ...)",
     "secrets: tests that require secret keys",
 ]
-addopts = "--cov=src --cov-fail-under=80"
+addopts = "--cov=src --cov-fail-under=100"
 
 [tool.coverage.run]
 source = ["."]
