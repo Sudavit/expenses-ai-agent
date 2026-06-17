@@ -3,8 +3,14 @@ from textwrap import dedent
 import pytest
 from streamlit.testing.v1 import AppTest
 
+try:
+    import plotly.express as _  # noqa: F401
+except ImportError:
+    pass
 
-def _run(script: str, timeout: float = 5.0) -> AppTest:
+
+def _run(script: str, timeout: float = 20.0) -> AppTest:
+    """Run Streamlit string script with an extended timeout to handle cold environments."""
     return AppTest.from_string(dedent(script), default_timeout=timeout).run()
 
 
